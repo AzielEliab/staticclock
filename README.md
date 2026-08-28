@@ -1,0 +1,121 @@
+# StaticClock
+
+A chrono-linguistic **release advisory**: the least-distorting, most
+analytically stable window for information, given timezone, language,
+and regional dialect.
+
+**Author:** Aziel Eliab
+**Date:** 2026
+**License:** [Apache-2.0](LICENSE)
+
+> It does not help messages travel farther. It helps them arrive intact.
+
+See the spec: [docs/whitepaper.md](docs/whitepaper.md).
+
+## Download
+
+Counted downloads (number on the button, no user reporting):
+[https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)
+
+Direct tarball (also counted): [staticclock-0.1.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.1.0.tar.gz)
+
+
+How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Forks are welcome and always allowed.**
+
+StaticClock is **advisory hygiene, not strategy.** It is not a scheduler,
+not a targeting system, not analytics, and not a user-profile tool. It
+does not optimize for reach, virality, or engagement. One advisory for
+one moment; then it forgets.
+
+This tree is the local Python implementation of the first-set paper
+*THE STATICCLOCK — A Chrono-Linguistic Release Advisory System*.
+
+---
+
+## What it answers
+
+“When should this be released so it is read, not reacted to?”
+
+Input is a last-known geo (free text) or a Top-30 country. Output is
+exactly five fields:
+
+| Field | Meaning |
+|-------|---------|
+| `geo_location_chosen` | One region from a five-basket polarize/shake |
+| `optimal_time` | Local clock time in the analytical window |
+| `optimal_date` | Local date in the chosen region |
+| `primary_language` | From the static bundled index |
+| `dialect_section` | One of five dialectal variants |
+
+No scores. No confidence. No alternatives. No “because”.
+
+## Install
+
+Python 3.10+. Stdlib only in the core (`zoneinfo`, `secrets`).
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+## CLI
+
+```bash
+staticclock version
+staticclock anchors
+staticclock advise --geo "United States"
+staticclock advise --geo "Indiana"
+staticclock advise --geo "United States" --json
+staticclock zones
+staticclock ui          # 127.0.0.1 only
+staticclock serve       # alias for ui
+```
+
+`advise` prints the five fields only. `zones` is read-only and does not
+change an advisory.
+
+## Library
+
+```python
+from staticclock.engine import StaticClock
+
+with StaticClock() as clock:
+    adv = clock.advise("Indiana")
+    print(adv.to_dict())
+# forget() ran on exit — nonce and inputs are gone
+```
+
+v0.1 ships the Top-30 geographic set plus five dialectal variants per
+language. A full 100+ language index is a replacement update of
+`staticclock/data/index.json`, not a network fetch.
+
+Default analytical window: **08:30–10:30** local. Documented overrides
+(later cultural morning starts): Spain, Argentina, Egypt.
+
+## Tests
+
+```bash
+pip install -e ".[dev]"
+python -m pytest -q
+```
+
+Offline. No network. No sqlite. No `.staticclock` store.
+
+## Layout
+
+```
+staticclock/          library (anchors, index, chronolect, glossa, polarize, engine, cli, ui)
+staticclock/data/     bundled Top-30 index
+tests/                pytest
+docs/whitepaper.md    spec (sections 1–13)
+examples/             advise once, then forget
+```
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).
+
+Forks are welcome and always allowed.
