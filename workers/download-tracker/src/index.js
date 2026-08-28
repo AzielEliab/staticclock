@@ -1,3 +1,5 @@
+import { handleRuntimeApi } from "./runtime.js";
+
 /**
  * StaticClock download tracker (Cloudflare Worker).
  *
@@ -216,6 +218,9 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
+
+    const runtime = await handleRuntimeApi(request, url);
+    if (runtime) return runtime;
 
     if (url.pathname === "/" && request.method === "GET") {
       return new Response(await indexHtml(env), {

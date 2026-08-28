@@ -143,6 +143,26 @@ examples/             advise once, then forget
 mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
+## Use with Grok, ChatGPT, Venice
+
+Live HTTPS runtime on the existing download-tracker Worker. Advisory only, not a scheduler.
+
+OpenAPI (ChatGPT GPT Actions / Venice custom HTTP / Grok custom tool):
+
+```
+https://staticclock-download-tracker.vibelock.workers.dev/openapi.json
+```
+
+Setup notes: [https://staticclock-download-tracker.vibelock.workers.dev/ai](https://staticclock-download-tracker.vibelock.workers.dev/ai)
+
+MCP catalog (ships separately): `https://aziel-runtime.vibelock.workers.dev/mcp`
+
+```bash
+curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/advisory \
+  -H "content-type: application/json" \
+  -d '{"geo": "Indiana", "language": "English"}'
+```
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
