@@ -1,5 +1,9 @@
 # StaticClock
 
+> **Renamed to ChronoLock.** This tree is kept (do not delete StaticClock).
+> Public name: [ChronoLock](https://github.com/AzielEliab/chronolock) ·
+> Worker: [https://chronolock-download-tracker.vibelock.workers.dev/](https://chronolock-download-tracker.vibelock.workers.dev/)
+
 A chrono-linguistic **release advisory**: the least-distorting, most
 analytically stable window for information, given timezone, language,
 and regional dialect.
