@@ -31,7 +31,8 @@ def _build_parser() -> argparse.ArgumentParser:
         description=(
             "StaticClock — chrono-linguistic release advisory "
             "(Aziel Eliab, 2026). Advisory hygiene, not strategy. "
-            "It does not help messages travel farther. It helps them arrive intact."
+            "It does not help messages travel farther. It helps them arrive intact. "
+            "Local UI: `staticclock ui` at http://127.0.0.1:8765."
         ),
     )
     sub = parser.add_subparsers(dest="cmd", required=True)

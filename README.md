@@ -10,6 +10,18 @@ and regional dialect.
 
 > It does not help messages travel farther. It helps them arrive intact.
 
+## Quick start
+
+```bash
+python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
+staticclock ui
+```
+
+Open http://127.0.0.1:8765 (loopback only). No CDN, no telemetry.
+
+Counted download: [https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)
+
+
 See the spec: [docs/whitepaper.md](docs/whitepaper.md).
 
 ## Download
@@ -77,6 +89,22 @@ staticclock serve       # alias for ui
 `advise` prints the five fields only. `zones` is read-only and does not
 change an advisory.
 
+
+## iPhone & Android
+
+Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.staticclock`. Offline. No analytics. Dark matte / gold.
+
+Geo → five advisory fields. Not a scheduler.
+
+```bash
+cd mobile
+flutter create --org com.azieeliab --project-name staticclock .
+flutter pub get
+flutter run
+```
+
+The `android/` and `ios/` folders in this tree are skeleton READMEs until you run `flutter create .` (this machine has no Flutter SDK on PATH). Then open `android/` in Android Studio or `ios/Runner.xcworkspace` in Xcode. Not a store listing.
+
 ## Library
 
 ```python
@@ -112,6 +140,7 @@ staticclock/data/     bundled Top-30 index
 tests/                pytest
 docs/whitepaper.md    spec (sections 1–13)
 examples/             advise once, then forget
+mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
 ## License
