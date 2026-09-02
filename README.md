@@ -195,6 +195,16 @@ curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/ad
   -d '{"geo": "Indiana", "language": "English"}'
 ```
 
+## Cite this
+
+Aziel Eliab. StaticClock. https://github.com/AzielEliab/staticclock. https://staticclock-download-tracker.vibelock.workers.dev.
+
+- Catalog: https://aziel-runtime.vibelock.workers.dev/
+- Worker homepage: https://staticclock-download-tracker.vibelock.workers.dev/
+- Counted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download
+- GitHub: https://github.com/AzielEliab/staticclock
+- Citation JSON: https://staticclock-download-tracker.vibelock.workers.dev/cite.json
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
