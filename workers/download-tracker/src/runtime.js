@@ -8,6 +8,8 @@ const PRODUCT = "staticclock";
 const VERSION = "0.1.0";
 const MOTTO = "It does not help messages travel farther. It helps them arrive intact.";
 const HOST = "https://staticclock-download-tracker.vibelock.workers.dev";
+const SKILL = "---\nname: StaticClock\ndescription: Use when an assistant should pick a least-distorting release window (timezone, language, dialect). Advisory only, not a scheduler. Pointer to ChronoLock; this product still installs its own tarball. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.\n---\n\n# StaticClock\n\nIt does not help messages travel farther. It helps them arrive intact. Renamed to ChronoLock \u2014 this tree is kept and still ships its own tarball.\n\nAuthor: **Aziel Eliab**.\n\nUse when an assistant should pick a least-distorting release window (timezone, language, dialect). Advisory only, not a scheduler. Pointer to ChronoLock; this product still installs its own tarball.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Endpoints (this Worker)\n\nHost: `https://staticclock-download-tracker.vibelock.workers.dev`\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| GET | `/v1/anchors` | List Top-30 geographic anchors. |\n| POST | `/v1/advisory` | One advisory for a last-known geo. Optional language/dialect hints. |\n\nOpenAPI: `https://staticclock-download-tracker.vibelock.workers.dev/openapi.json`\n\nCatalog OpenAPI: `https://aziel-runtime.vibelock.workers.dev/openapi.json`\n\nMCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n\nCatalog aliases under `/p/staticclock/\u2026`.\n\n## How to call (Mozilla/5.0)\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/advisory \\\n  -H 'content-type: application/json' \\\n  -d '{\"geo\":\"Indiana\",\"language\":\"English\"}'\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill\n```\n\nGrok: import the catalog OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash\nstaticclock ui\n```\n\nThen open http://127.0.0.1:8765 (this computer only).\n\n## Honest banner\n\nTHIS IS: chrono-linguistic release advisory (five fields). THIS IS NOT: a scheduler, targeting, analytics, user-profile tool, virality optimizer. Pointer product to ChronoLock; this tree is kept. Author Aziel Eliab.\n\nApache-2.0 (or the repo LICENSE). Forks are welcome and always allowed.\n";
+
 const OUTPUT_FIELDS = ["geo_location_chosen", "optimal_time", "optimal_date", "primary_language", "dialect_section"];
 const DEFAULT_ANCHOR = "United States";
 const DEFAULT_WINDOW = ["08:30", "10:30"];
@@ -272,7 +274,15 @@ function openapiSpec() {
     },
     servers: [{ url: HOST }],
     paths: {
-      "/v1/health": {
+      
+      "/v1/skill": {
+        get: {
+          operationId: "staticclock_skill",
+          summary: "Return skill markdown. Does not increment download KV.",
+          responses: { "200": { description: "markdown" } },
+        },
+      },
+"/v1/health": {
         get: { operationId: "health", summary: "Liveness", responses: { "200": { description: "ok", content: { "application/json": { schema: { type: "object" } } } } } },
       },
       "/v1/anchors": {
@@ -342,6 +352,12 @@ export async function handleRuntimeApi(request, url) {
   if (!isApi) return null;
   if (path === "/v1/health" && request.method === "GET") {
     return json({ ok: true, product: PRODUCT, version: VERSION });
+  }
+  if (path === "/v1/skill" && request.method === "GET") {
+    return new Response(SKILL, {
+      status: 200,
+      headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "private, no-store", ...corsHeaders() },
+    });
   }
   if (path === "/openapi.json" && request.method === "GET") return json(openapiSpec());
   if (path === "/ai" && request.method === "GET") {

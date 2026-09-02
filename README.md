@@ -21,6 +21,34 @@ python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
 staticclock ui
 ```
 
+
+## One-click install
+
+```bash
+curl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash
+```
+
+The script curls the **counted** tarball from this project's Worker
+(`/download`, User-Agent `Mozilla/5.0`), extracts, makes a venv, and
+`pip install -e .`. Then run `staticclock ui`.
+
+Or tap **Download** / **One-click install** on the Worker homepage:
+https://staticclock-download-tracker.vibelock.workers.dev/
+
+## Counted download (Cloudflare Worker)
+
+**This is the counted download.** GitHub releases exist as a mirror.
+The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
+
+- Homepage: [https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)
+- Direct tarball: [staticclock-0.1.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.1.0.tar.gz)
+- One-click install: [https://staticclock-download-tracker.vibelock.workers.dev/install.sh](https://staticclock-download-tracker.vibelock.workers.dev/install.sh)
+- Skill: [https://staticclock-download-tracker.vibelock.workers.dev/v1/skill](https://staticclock-download-tracker.vibelock.workers.dev/v1/skill)
+- OpenAPI: [https://staticclock-download-tracker.vibelock.workers.dev/openapi.json](https://staticclock-download-tracker.vibelock.workers.dev/openapi.json)
+- GitHub: [https://github.com/AzielEliab/staticclock](https://github.com/AzielEliab/staticclock)
+
+Isolated counter: Worker `staticclock-download-tracker`, KV `STATICCLOCK_DOWNLOADS`. `/v1` does not increment downloads.
+
 Open http://127.0.0.1:8765 (loopback only). No CDN, no telemetry.
 
 Counted download: [https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)

@@ -1,11 +1,14 @@
 # staticclock download tracker
 
-## Use with Grok, ChatGPT, Venice
+Isolated Worker `staticclock-download-tracker`. Project `staticclock`.
+KV namespace `STATICCLOCK_DOWNLOADS` bound as `DOWNLOADS`.
+Does **not** 302 to GitHub on `/download`. Serves gzip via `ASSETS.fetch`,
+`Cache-Control: private, no-store`.
 
-This Worker now also hosts the product runtime API. `/v1` calls never increment DOWNLOADS KV.
+GET `/` increments a **page-view** counter (separate from downloads).
+GET `/download` increments **downloads**.
+`/v1` never increments DOWNLOADS KV.
+GET `/install.sh` one-click install (does not increment; script curls `/download`).
+GET `/v1/skill` returns skill markdown (`text/markdown`). Does not increment views or downloads.
 
-- OpenAPI: `https://staticclock-download-tracker.vibelock.workers.dev/openapi.json`
-- Health: `GET /v1/health` → `{ok, product, version:"0.1.0"}`
-- Setup HTML: `GET /ai` (ChatGPT Actions, Grok/xAI custom tool, Venice custom HTTP; MCP catalog `https://aziel-runtime.vibelock.workers.dev/mcp`)
-
-CORS `*` on API routes.
+Host: https://staticclock-download-tracker.vibelock.workers.dev

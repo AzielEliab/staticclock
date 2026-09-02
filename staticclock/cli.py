@@ -75,6 +75,16 @@ def _build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument("--host", default="127.0.0.1", help="Loopback host (default 127.0.0.1).")
     p_serve.add_argument("--port", type=int, default=8765, help="Port (default 8765).")
 
+
+    p_doc = sub.add_parser("doctor", help="Self-check. No network, no telemetry.")
+    p_doc.add_argument("--json", action="store_true", dest="as_json", help="Print doctor results as JSON.")
+
+    p_imp = sub.add_parser("import", help="Import a JSON document.")
+    p_imp.add_argument("path")
+
+    p_exp = sub.add_parser("export", help="Export a JSON document.")
+    p_exp.add_argument("path")
+
     return parser
 
 
@@ -122,6 +132,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         except ValueError as exc:
             print(str(exc), file=sys.stderr)
             return 2
+        return 0
+
+
+    if args.cmd == "doctor":
+        from staticclock.doctor import run_doctor
+
+        return run_doctor(as_json=getattr(args, "as_json", False))
+
+    if args.cmd == "import":
+        from staticclock.jsonio import import_json
+
+        rec = import_json(args.path)
+        sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
+        return 0
+
+    if args.cmd == "export":
+        from staticclock.jsonio import export_json
+
+        rec = export_json(args.path)
+        sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
         return 0
 
     parser.error(f"unknown command {args.cmd}")
