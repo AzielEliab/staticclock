@@ -9,6 +9,7 @@
     lang: document.getElementById("out-lang"),
     dialect: document.getElementById("out-dialect")
   };
+  var lastExport = null;
 
   function fill(el, value) {
     el.textContent = value || "—";
@@ -22,6 +23,46 @@
     fill(fields.date, "");
     fill(fields.lang, "");
     fill(fields.dialect, "");
+  }
+
+  function renderTimeline(payload) {
+    var clicks = (payload && payload.clicks) || [];
+    var verify = (payload && payload.verify) || {};
+    var count = document.getElementById("click-count");
+    var note = document.getElementById("verify-note");
+    var list = document.getElementById("ticks");
+    count.innerHTML = String(clicks.length) + "<span>clicks</span>";
+    var slate = (payload && payload.timeslate) || null;
+    var slateEl = document.getElementById("timeslate-note");
+    if (!clicks.length) {
+      note.textContent = "empty gear";
+      if (slateEl) slateEl.textContent = "timeslate: —";
+    } else if (verify.ok) {
+      note.textContent = "verified · last " + (verify.last_hash || "").slice(0, 12);
+      if (slateEl) {
+        slateEl.textContent = slate && slate.cross_hash
+          ? "timeslate " + slate.cross_hash.slice(0, 16) + " · TemporalLock lattice"
+          : "timeslate: —";
+      }
+    } else {
+      note.textContent = "broken gear";
+    }
+    list.textContent = "";
+    clicks.forEach(function (tick) {
+      var li = document.createElement("li");
+      li.innerHTML =
+        "<span class=\"tooth\">" + tick.click + "</span>" +
+        "<span class=\"second\">" + (tick.second || "") + "</span>" +
+        "<span class=\"src\">" + (tick.source || "") + "</span>" +
+        "<span class=\"act\">" + (tick.action || "") + "</span>" +
+        "<code>" + (tick.hash || "").slice(0, 16) + "</code>";
+      list.appendChild(li);
+    });
+    lastExport = { product: "staticclock", author: "Aziel Eliab", clicks: clicks, verify: verify, timeslate: slate };
+  }
+
+  function refreshTimeline() {
+    return fetch("/api/timeline").then(function (r) { return r.json(); }).then(renderTimeline);
   }
 
   fetch("/api/anchors").then(function (r) { return r.json(); }).then(function (names) {
@@ -47,6 +88,51 @@
     });
   });
 
+  refreshTimeline();
+
+  document.getElementById("click-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var action = (document.getElementById("action").value || "").trim();
+    var btn = document.getElementById("go-click");
+    btn.disabled = true;
+    fetch("/api/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: action, source: "local" })
+    }).then(function (r) { return r.json(); }).then(function (body) {
+      if (body.error) return;
+      document.getElementById("action").value = "";
+      renderTimeline(body);
+    }).finally(function () { btn.disabled = false; });
+  });
+
+  document.getElementById("hook-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var action = (document.getElementById("hook-action").value || "").trim();
+    var session = (document.getElementById("hook-session").value || "").trim();
+    var btn = document.getElementById("go-hook");
+    btn.disabled = true;
+    fetch("/api/hook", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: action, session: session })
+    }).then(function (r) { return r.json(); }).then(function (body) {
+      if (body.error) return;
+      document.getElementById("hook-action").value = "";
+      renderTimeline(body);
+    }).finally(function () { btn.disabled = false; });
+  });
+
+  document.getElementById("verify-btn").addEventListener("click", function () {
+    fetch("/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    }).then(function (r) { return r.json(); }).then(function () {
+      return refreshTimeline();
+    });
+  });
+
   document.getElementById("advise-form").addEventListener("submit", function (ev) {
     ev.preventDefault();
     var text = (geo.value || "").trim();
@@ -63,6 +149,7 @@
       fill(fields.date, adv.optimal_date);
       fill(fields.lang, adv.primary_language);
       fill(fields.dialect, adv.dialect_section);
+      return refreshTimeline();
     }).catch(function () {
       clearAdvisory();
     }).finally(function () {
@@ -93,7 +180,6 @@
     });
   }
 
-  var lastAdvisory = null;
   bindFileImport("import-json", function (obj) {
     var g = obj.geo || obj.geo_location_chosen || "";
     if (g) document.getElementById("geo").value = g;
@@ -102,11 +188,15 @@
     if (obj.optimal_date) fill(fields.date, obj.optimal_date);
     if (obj.primary_language) fill(fields.lang, obj.primary_language);
     if (obj.dialect_section) fill(fields.dialect, obj.dialect_section);
-    lastAdvisory = obj;
+    if (obj.action) document.getElementById("action").value = obj.action;
+    if (Array.isArray(obj.clicks)) renderTimeline(obj);
+    lastExport = obj;
   });
   var ex = document.getElementById("export-json");
   if (ex) ex.addEventListener("click", function () {
-    var payload = lastAdvisory || {
+    var payload = lastExport || {
+      product: "staticclock",
+      author: "Aziel Eliab",
       geo: (document.getElementById("geo").value || ""),
       geo_location_chosen: document.getElementById("out-geo").textContent,
       optimal_time: document.getElementById("out-time").textContent,
@@ -114,6 +204,6 @@
       primary_language: document.getElementById("out-lang").textContent,
       dialect_section: document.getElementById("out-dialect").textContent
     };
-    downloadJson("staticclock-advisory.json", payload);
+    downloadJson("staticclock-timeline.json", payload);
   });
 })();

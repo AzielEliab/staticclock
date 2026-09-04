@@ -14,34 +14,37 @@ pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `json`,
-`http.server`). pytest is the dev extra. No network.
+Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
+`json`, `http.server`). pytest is the dev extra. No network.
 
 ## Ground rules
 
-1. **No persistence.** Do not add sqlite, a `.staticclock` store, or a
-   log of past advisories. Session state lives in memory and dies on
-   `forget()`.
-2. **No user identification.** Last-known geo is a string, not a profile.
-3. **No targeting, no virality optimization, no engagement metrics.**
-   Do not add ML, A/B, reach scores, or outcome learning.
-4. **User-facing output is five fields.** No scores, no confidence, no
-   alternatives, no “because” in the CLI, JSON, or UI report. Tests may
-   inspect internals.
-5. **Keep the dependency list tiny.** Stdlib only in the core.
-6. **UI binds loopback only** (`127.0.0.1`). Do not listen on `0.0.0.0`.
-7. New behavior needs a test that fails without the change.
+1. **The gear only clicks forward.** No rollback, pop, insert, delete,
+   or rewrite of earlier clicks. A correction is a new click.
+2. **AZ-OS hook records only.** It does not exec and does not open a
+   remote shell.
+3. **Author is Aziel Eliab only.** Do not add other identity labels.
+4. **Advisory companion still forgets its nonce.** `forget()` drops
+   last-known geo and the one-shot nonce. It does not rewind the gear.
+5. **No user identification.** Last-known geo is a string, not a profile.
+6. **Keep the dependency list tiny.** Stdlib only in the core.
+7. **UI binds loopback only** (`127.0.0.1`). Do not listen on `0.0.0.0`.
+8. New behavior needs a test that fails without the change.
 
 ## Where to change things
 
+- Gear / hash / no-rollback: `staticclock/timeline.py`
+- Timeslate cross-hash (TemporalLock lattice bind): `staticclock/timeslate.py`
+- AZ-OS hook: `staticclock/azos.py`
+- Session / advise / forget: `staticclock/engine.py`
 - Top-30 / geo resolve: `staticclock/anchors.py`
 - Bundled index: `staticclock/data/index.json`, `staticclock/index.py`
 - Windows: `staticclock/chronolect.py`
 - Language / dialect: `staticclock/glossa.py`
 - Five-basket shake: `staticclock/polarize.py`
-- Session / forget: `staticclock/engine.py`
 - CLI: `staticclock/cli.py`
 - Local UI: `staticclock/ui.py`, `staticclock/web/`
+- Hosted runtime: `workers/download-tracker/src/runtime.js`
 
 ## License of contributions
 

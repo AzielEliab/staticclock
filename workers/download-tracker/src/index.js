@@ -16,7 +16,7 @@ import { handleRuntimeApi } from "./runtime.js";
  */
 
 const PROJECT = "staticclock";
-const DEFAULT_ASSET = "staticclock-0.1.0.tar.gz";
+const DEFAULT_ASSET = "staticclock-0.2.0.tar.gz";
 const DEFAULT_OWNER = "AzielEliab";
 const DEFAULT_REPO = "staticclock";
 const DEFAULT_BRANCH = "main";
@@ -339,8 +339,8 @@ async function indexHtml(env) {
 </style>
 <body>
   <h1>StaticClock</h1>
-  <p class="motto">It does not help messages travel farther. It helps them arrive intact. Renamed to ChronoLock — this tree is kept and still ships its own tarball. Author Aziel Eliab.</p>
-  <p class="banner">THIS IS: chrono-linguistic release advisory (five fields). THIS IS NOT: a scheduler, targeting, analytics, user-profile tool, virality optimizer. Pointer product to ChronoLock; this tree is kept. Author Aziel Eliab.</p>
+  <p class="motto">Every action is a gear click. Time only locks forward. Author Aziel Eliab.</p>
+  <p class="banner">THIS IS: an action-based immutable timeline — every action is a gear click or second that locks forward. AZ-OS hook. THIS IS NOT: a rollback clock, a remote shell, or ChronoLock. Related: ChronoLock (advisory window). Distinct from TemporalLock (observation receipts). Author Aziel Eliab.</p>
   <div class="card">
     <div class="nums">
       <p class="count">${v}<span>Views</span></p>
@@ -352,7 +352,7 @@ async function indexHtml(env) {
       <button type="button" class="btn install" id="install-btn">One-click install</button>
     </div>
     <pre id="install-cmd">${INSTALL_LINE}</pre>
-    <p class="kid">Then run: <code>staticclock ui</code> and open http://127.0.0.1:8765 (this computer only).</p>
+    <p class="kid">Then run: <code>staticclock ui</code> and open http://127.0.0.1:8765 (this computer only). Click the gear. Optional AZ-OS hook.</p>
     <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${DEFAULT_ASSET} — ${n} counted.</p>
     <p class="iso">Isolated counter: Worker <code>staticclock-download-tracker</code>, project <code>${PROJECT}</code>, KV <code>STATICCLOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
     <p class="meta">GitHub: stars ${gh.stars || 0} · forks ${gh.forks || 0} · watchers ${gh.watchers || 0} · release assets ${gh.release_download_count || 0}</p>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One advisory, then forget. No network. No store of past advisories."""
+"""Companion advisory, then forget nonce. The gear click stays."""
 
 from __future__ import annotations
 

@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Callable
 
 from staticclock import __version__
+from staticclock.azos import AZOS_PRINCIPLE, AzosHook
+from staticclock.timeline import NoRollbackError, Timeline
 
 AUTHOR = "Aziel Eliab"
 Check = tuple[str, bool, str]
@@ -45,6 +47,61 @@ def _check_identity() -> Check:
     return _ok("identity", AUTHOR)
 
 
+def _check_gear() -> Check:
+    gear = Timeline()
+    first = gear.click("genesis", source="local", second="2026-09-04T00:00:00Z")
+    second = gear.click("next second", source="local", second="2026-09-04T00:00:01Z")
+    result = gear.verify()
+    if first.click != 1 or second.click != 2:
+        return _fail("gear", "click numbers")
+    if second.prev_hash != first.hash:
+        return _fail("gear", "link")
+    if not result.ok:
+        return _fail("gear", "; ".join(result.errors))
+    try:
+        gear.rollback()
+    except NoRollbackError:
+        return _ok("gear", f"{result.length} clicks, no rollback")
+    return _fail("gear", "rollback was allowed")
+
+
+def _check_azos_hook() -> Check:
+    hook = AzosHook()
+    tick = hook.record("invite accepted", session="demo", second="2026-09-04T00:00:02Z")
+    status = hook.status()
+    if tick.source != "azos":
+        return _fail("azos hook", tick.source)
+    if status.get("exec") or status.get("remote_shell"):
+        return _fail("azos hook", "hook must not exec")
+    if AZOS_PRINCIPLE not in str(status.get("principle")):
+        return _fail("azos hook", "principle")
+    if not hook.timeline.verify().ok:
+        return _fail("azos hook", "verify")
+    return _ok("azos hook", "record only")
+
+
+def _check_timeslate() -> Check:
+    from staticclock.timeslate import LATTICE, timeslate_of
+
+    gear = Timeline()
+    tick = gear.click("opened", source="local", second="2026-09-04T00:00:00Z")
+    slate = timeslate_of(tick)
+    if slate.get("lattice") != LATTICE:
+        return _fail("timeslate", "lattice")
+    if slate.get("click_hash") != tick.hash:
+        return _fail("timeslate", "click_hash")
+    if len(str(slate.get("cross_hash") or "")) != 64:
+        return _fail("timeslate", "cross_hash")
+    if gear.timeslate() != slate:
+        return _fail("timeslate", "tip")
+    from staticclock.timeslate import verify_timeslate
+
+    if not verify_timeslate(slate) or "cross_hash=" not in str(slate.get("evidence")):
+        return _fail("timeslate", "evidence")
+    if len(gear.timeslates()) != 1:
+        return _fail("timeslate", "lattice length")
+    return _ok("timeslate", "temporallock bind")
+
 
 def _check_json_roundtrip() -> Check:
     from staticclock.jsonio import export_json, import_json
@@ -68,6 +125,9 @@ def _check_json_roundtrip() -> Check:
 CHECKS: tuple[Callable[[], Check], ...] = (
     _check_version,
     _check_identity,
+    _check_gear,
+    _check_azos_hook,
+    _check_timeslate,
     _check_json_roundtrip,
 )
 
@@ -91,6 +151,7 @@ def run_doctor(*, as_json: bool = False) -> int:
         "author": AUTHOR,
         "network": False,
         "telemetry": False,
+        "rollbacks": False,
     }
     if as_json:
         print(json.dumps(payload, indent=2))

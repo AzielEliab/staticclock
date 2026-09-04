@@ -1,31 +1,43 @@
 # THE STATICCLOCK
 
-**A Chrono-Linguistic Release Advisory System**
+**An Action-Based Immutable Timeline**
 
 Aziel Eliab
 2026
 License: Apache-2.0
 
-> It does not help messages travel farther. It helps them arrive intact.
+> Every action is a gear click. Time only locks forward.
 
 ---
 
-## Abstract
+## Abstract (v0.2)
 
-StaticClock is a software-only advisory system. Given a last-known
+StaticClock is an action-based immutable timeline. Every action is a
+gear click — a second that locks forward. There are no rollbacks. The
+AZ-OS hook records principle-bound actions into this gear. It does not
+execute a remote shell.
+
+The question it answers is:
+
+**What happened, in order, as actions that cannot rewind?**
+
+A companion chrono-linguistic advisory (sections 1–13) remains in this
+tree. ChronoLock is the related public advisory-window product.
+TemporalLock is observation receipts. This document specifies
+StaticClock as implemented by the `staticclock` Python package, version
+0.2.0. Author: Aziel Eliab. Forks are welcome and always allowed.
+
+---
+
+## Abstract (v0.1, historical)
+
+StaticClock began as a software-only advisory system. Given a last-known
 geography, it names a least-distorting, most analytically stable
 *release window* for information — a place, a local clock time, a local
-date, a primary language, and a dialectal register. It does not optimize
-for reach, virality, or engagement. It holds no memory, no identity, and
-no historical data. Closed internal logic produces one advisory for one
-moment, then forgets.
-
-The question it answers is not “when will this travel farthest?” It is:
-
-**When should this be released so it is read, not reacted to?**
-
-This document is the specification implemented by the `staticclock`
-Python package, version 0.1.0. Forks are welcome and always allowed.
+date, a primary language, and a dialectal register. Closed internal
+logic produces one advisory for one moment; `forget()` drops the nonce
+and inputs. That companion still exists. It is no longer the product
+identity.
 
 ---
 
@@ -228,6 +240,132 @@ It will name a place, a morning, a language, and a dialect in which a
 sentence is more likely to be read as a sentence.
 
 It does not help messages travel farther. It helps them arrive intact.
+
+Aziel Eliab
+2026
+Apache-2.0
+Forks are welcome and always allowed.
+
+---
+
+## 14. Elevation (v0.2)
+
+Product identity is the gear, not the five-field advisory.
+
+StaticClock is an **action-based immutable timeline**. Like a
+mechanical clock, the gear clicks forward. Each action is one tooth —
+one second — and that tooth does not come back. There is no rewind,
+no pop, no rewrite of an earlier click. A later action that mentions
+an earlier hash is a new click. The old click stays.
+
+ChronoLock remains the related advisory-window product (Temporal
+Neutral Window 08:30–10:30 local). TemporalLock remains observation
+receipts. StaticClock is the action ledger.
+
+## 15. Gear-click ledger
+
+A click has these core fields:
+
+- `click` — 1-based tooth index
+- `second` — UTC second (`YYYY-MM-DDTHH:MM:SSZ`)
+- `action` — what happened
+- `source` — `local`, `azos`, or `advise`
+- `prev_hash` — SHA-256 of the prior click (genesis is 64 zero hex chars)
+- `hash` — SHA-256 of this click's canonical encoding
+
+Canonical encoding is UTF-8 JSON with sorted keys and no extra
+whitespace. Hashed fields: `action`, `click`, `prev_hash`, `second`,
+`source`. The click's own `hash` is excluded.
+
+`Timeline.click(action)` only. `rollback()`, `rewind()`, `pop()`,
+`clear()`, `reverse()`, replace, and delete raise `NoRollbackError`.
+
+Optional local JSONL is append-only (`mode 'a'`). Hosted `/v1` is
+stateless: the caller sends existing `clicks`; the Worker does not
+store a chain.
+
+## 15a. Timeslate cross-hash (TemporalLock lattice)
+
+StaticClock gear-clicks are the immutable ticks. TemporalLock
+hash-chains those ticks into a timeslate lattice for AZ-OS system
+integrity. This tree ships the StaticClock side only.
+
+A **timeslate** is the bindable face of one click (schema
+`staticclock-timeslate-v1`). Canonical fields, sorted JSON, no extra
+whitespace:
+
+- `click`
+- `click_hash` (the click's own SHA-256)
+- `product` (`staticclock`)
+- `schema`
+- `second`
+
+`cross_hash` is SHA-256 of that encoding. `evidence` is one line
+TemporalLock may put on a receipt:
+
+```
+schema=staticclock-timeslate-v1 product=staticclock lattice=temporallock click=N second=... click_hash=... cross_hash=...
+```
+
+`bind` is the TemporalLock-shaped payload: `summary`, `evidence`,
+`confidence` 1.0, `timestamp` equal to the click's `second`.
+`Timeline.timeslates()` returns one timeslate per click. Anyone can
+`verify_timeslate`. StaticClock does not store TemporalLock receipts
+and does not exec.
+
+CLI: `staticclock timeslate`. Hosted: `POST /v1/timeslate`.
+
+## 16. AZ-OS hook
+
+AZ-OS is a principle-bound remote shell (integrity precedes
+execution). StaticClock's hook is the recording surface:
+
+- `AzosHook.record(action, session=..., principle=...)` appends one
+  click with `source=azos`
+- `AzosHook.status()` reports hook liveness
+- `exec` is always false
+- `remote_shell` is always false
+
+The hook does not grant AZ-OS privileges and does not run commands.
+It locks the action into time.
+
+Hosted: `POST /v1/hook`. Local CLI: `staticclock hook`. Local UI:
+Record via AZ-OS.
+
+## 17. Forget versus rewind
+
+`forget()` still drops the advisory nonce and last-known geo. That
+is session hygiene for the companion advisory. It is not a rollback.
+The gear keeps every click, including `advise <region>` clicks minted
+when `advise()` runs.
+
+## 18. Interface (v0.2)
+
+Library: `Timeline.click`, `Timeline.verify`, `AzosHook.record`,
+`StaticClock.advise`.
+
+CLI:
+
+```
+staticclock version
+staticclock click --action "opened the ledger"
+staticclock hook --action "invite accepted"
+staticclock genesis --timeline ticks.jsonl --action "first"
+staticclock timeline --timeline ticks.jsonl
+staticclock verify --timeline ticks.jsonl
+staticclock timeslate --timeline ticks.jsonl
+staticclock advise --geo "Indiana"
+staticclock ui
+```
+
+UI (`staticclock ui` / `serve`): action input, AZ-OS hook, verify,
+import/export, companion advisory, read-only timezone panel.
+Self-contained CSS. No CDN. Bound to **127.0.0.1 only**. No rollback
+route.
+
+Hosted Worker: `GET /v1/health`, `GET /v1/skill`, `GET /v1/example`,
+`GET /v1/anchors`, `POST /v1/click`, `POST /v1/hook`, `POST /v1/verify`,
+`POST /v1/timeslate`, `POST /v1/advisory`. `POST /v1/rollback` returns 400.
 
 Aziel Eliab
 2026

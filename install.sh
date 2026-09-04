@@ -4,7 +4,7 @@
 set -euo pipefail
 
 HOST="${STATICCLOCK_HOME_HOST:-https://staticclock-download-tracker.vibelock.workers.dev}"
-ASSET="${STATICCLOCK_HOME_ASSET:-staticclock-0.1.0.tar.gz}"
+ASSET="${STATICCLOCK_HOME_ASSET:-staticclock-0.2.0.tar.gz}"
 WORKDIR="${STATICCLOCK_HOME:-$HOME/staticclock}"
 
 mkdir -p "$WORKDIR"

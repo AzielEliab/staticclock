@@ -1,6 +1,7 @@
 # StaticClock — iPhone & Android
 
-Enter a geo. One advisory of five fields: geo_location_chosen, optimal_time, optimal_date, primary_language, dialect_section. Then forgets.
+Action-based immutable timeline. Every action is a gear click. No rollbacks.
+AZ-OS hook records on device. Companion advisory still available.
 
 Offline. No analytics. Dark matte / gold.
 
@@ -23,7 +24,8 @@ Xcode.
 
 ## Honest scope
 
-Not a scheduler, targeting system, or analytics. Does not optimize for reach or virality. No scores or because.
+Action-based immutable timeline. The gear does not rewind. AZ-OS hook
+does not exec. Author Aziel Eliab.
 
 ## Desktop package (counted download)
 

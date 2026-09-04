@@ -1,18 +1,19 @@
 # StaticClock
 
-> **Renamed to ChronoLock.** This tree is kept (do not delete StaticClock).
-> Public name: [ChronoLock](https://github.com/AzielEliab/chronolock) ·
-> Worker: [https://chronolock-download-tracker.vibelock.workers.dev/](https://chronolock-download-tracker.vibelock.workers.dev/)
-
-A chrono-linguistic **release advisory**: the least-distorting, most
-analytically stable window for information, given timezone, language,
-and regional dialect.
+An **action-based immutable timeline**. Every action is a gear click —
+a second that locks forward. **No rollbacks.** AZ-OS records
+principle-bound actions into this gear.
 
 **Author:** Aziel Eliab
 **Date:** 2026
 **License:** [Apache-2.0](LICENSE)
 
-> It does not help messages travel farther. It helps them arrive intact.
+> Every action is a gear click. Time only locks forward.
+
+ChronoLock is a related advisory-window product
+([chronolock](https://github.com/AzielEliab/chronolock)). TemporalLock
+is observation receipts. This tree is StaticClock and still ships its
+own tarball.
 
 ## Quick start
 
@@ -41,7 +42,7 @@ https://staticclock-download-tracker.vibelock.workers.dev/
 The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
 
 - Homepage: [https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)
-- Direct tarball: [staticclock-0.1.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.1.0.tar.gz)
+- Direct tarball: [staticclock-0.2.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz)
 - One-click install: [https://staticclock-download-tracker.vibelock.workers.dev/install.sh](https://staticclock-download-tracker.vibelock.workers.dev/install.sh)
 - Skill: [https://staticclock-download-tracker.vibelock.workers.dev/v1/skill](https://staticclock-download-tracker.vibelock.workers.dev/v1/skill)
 - OpenAPI: [https://staticclock-download-tracker.vibelock.workers.dev/openapi.json](https://staticclock-download-tracker.vibelock.workers.dev/openapi.json)
@@ -61,43 +62,55 @@ See the spec: [docs/whitepaper.md](docs/whitepaper.md).
 Counted downloads (number on the button, no user reporting):
 [https://staticclock-download-tracker.vibelock.workers.dev/](https://staticclock-download-tracker.vibelock.workers.dev/)
 
-Direct tarball (also counted): [staticclock-0.1.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.1.0.tar.gz)
+Direct tarball (also counted): [staticclock-0.2.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz)
 
 
 How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Forks are welcome and always allowed.**
 
-StaticClock is **advisory hygiene, not strategy.** It is not a scheduler,
-not a targeting system, not analytics, and not a user-profile tool. It
-does not optimize for reach, virality, or engagement. One advisory for
-one moment; then it forgets.
+StaticClock is an action-based immutable timeline. The gear clicks
+forward. A later action that mentions an earlier hash is a new click.
+The old click stays. The AZ-OS hook records; it does not exec.
 
-This tree is the local Python implementation of the first-set paper
-*THE STATICCLOCK — A Chrono-Linguistic Release Advisory System*.
+This tree is the local Python implementation of *THE STATICCLOCK*.
 
 ---
 
 ## What it answers
 
-“When should this be released so it is read, not reacted to?”
+“What happened, in order, as actions that cannot rewind?”
 
-Input is a last-known geo (free text) or a Top-30 country. Output is
-exactly five fields:
+Each click is:
 
 | Field | Meaning |
 |-------|---------|
-| `geo_location_chosen` | One region from a five-basket polarize/shake |
-| `optimal_time` | Local clock time in the analytical window |
-| `optimal_date` | Local date in the chosen region |
-| `primary_language` | From the static bundled index |
-| `dialect_section` | One of five dialectal variants |
+| `click` | Gear tooth, 1-based |
+| `second` | UTC second the action locked (`YYYY-MM-DDTHH:MM:SSZ`) |
+| `action` | What happened |
+| `source` | `local`, `azos`, or `advise` |
+| `prev_hash` | SHA-256 of the prior click (genesis is 64 zero hex chars) |
+| `hash` | SHA-256 of this click's canonical encoding |
 
-No scores. No confidence. No alternatives. No “because”.
+Canonical encoding: UTF-8 JSON, sorted keys, no extra whitespace.
+Hashed fields: `action`, `click`, `prev_hash`, `second`, `source`.
+The click's own `hash` is excluded.
+
+A companion advisory (`advise`) still names a geo, local time, date,
+language, and dialect. That call also clicks the gear. ChronoLock is
+the public name of the advisory-window product.
+
+### Timeslate (TemporalLock lattice)
+
+Each click has a timeslate (`staticclock-timeslate-v1`). Canonical
+fields `click`, `click_hash`, `product`, `schema`, `second` hash to
+`cross_hash`. TemporalLock hash-chains that timeslate into its lattice
+for AZ-OS system integrity — put `bind.evidence` on a TemporalLock
+receipt. StaticClock does not store TemporalLock receipts.
 
 ## Install
 
-Python 3.10+. Stdlib only in the core (`zoneinfo`, `secrets`).
+Python 3.10+. Stdlib only in the core (`zoneinfo`, `secrets`, `hashlib`).
 
 ```bash
 python -m venv .venv
@@ -109,24 +122,30 @@ pip install -e ".[dev]"
 
 ```bash
 staticclock version
-staticclock anchors
+staticclock click --action "opened the ledger"
+staticclock click --timeline ticks.jsonl --action "next second" --json
+staticclock hook --action "invite accepted" --session azos-1
+staticclock genesis --timeline ticks.jsonl --action "first click"
+staticclock timeline --timeline ticks.jsonl
+staticclock verify --timeline ticks.jsonl
+staticclock timeslate --timeline ticks.jsonl
 staticclock advise --geo "United States"
-staticclock advise --geo "Indiana"
-staticclock advise --geo "United States" --json
+staticclock advise --geo "Indiana" --json
+staticclock anchors
 staticclock zones
 staticclock ui          # 127.0.0.1 only
 staticclock serve       # alias for ui
+staticclock doctor
 ```
 
-`advise` prints the five fields only. `zones` is read-only and does not
-change an advisory.
+`click` and `hook` append. There is no rollback command.
 
 
 ## iPhone & Android
 
 Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.staticclock`. Offline. No analytics. Dark matte / gold.
 
-Geo → five advisory fields. Not a scheduler.
+Action → immutable click. AZ-OS hook on device. Companion advisory still available.
 
 ```bash
 cd mobile
@@ -140,20 +159,26 @@ The `android/` and `ios/` folders in this tree are skeleton READMEs until you ru
 ## Library
 
 ```python
-from staticclock.engine import StaticClock
+from staticclock import AzosHook, StaticClock, Timeline, timeslate_of
 
-with StaticClock() as clock:
+gear = Timeline()
+gear.click("opened the ledger")
+AzosHook(gear).record("invite accepted", session="azos-1")
+assert gear.verify().ok
+slate = gear.timeslate()
+# TemporalLock genesis/append uses slate["bind"]:
+#   summary, evidence, confidence=1.0, timestamp=click second
+# gear.rollback() raises NoRollbackError
+
+with StaticClock(timeline=gear) as clock:
     adv = clock.advise("Indiana")
     print(adv.to_dict())
-# forget() ran on exit — nonce and inputs are gone
+# forget() drops nonce and inputs — the gear does not rewind
 ```
 
-v0.1 ships the Top-30 geographic set plus five dialectal variants per
-language. A full 100+ language index is a replacement update of
-`staticclock/data/index.json`, not a network fetch.
-
-Default analytical window: **08:30–10:30** local. Documented overrides
-(later cultural morning starts): Spain, Argentina, Egypt.
+v0.2 ships the append-only gear, the AZ-OS hook, and the Top-30
+companion advisory index. A full 100+ language index is a replacement
+update of `staticclock/data/index.json`, not a network fetch.
 
 ## Tests
 
@@ -162,22 +187,24 @@ pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-Offline. No network. No sqlite. No `.staticclock` store.
+Offline. No network. No sqlite.
 
 ## Layout
 
 ```
-staticclock/          library (anchors, index, chronolect, glossa, polarize, engine, cli, ui)
+staticclock/          library (timeline, azos hook, advisory engine, cli, ui)
 staticclock/data/     bundled Top-30 index
 tests/                pytest
-docs/whitepaper.md    spec (sections 1–13)
-examples/             advise once, then forget
-mobile/              Flutter iPhone + Android (`flutter create .`)
+docs/whitepaper.md    spec
+examples/             click once; advise once
+mobile/               Flutter iPhone + Android (`flutter create .`)
 ```
 
 ## Use with Grok, ChatGPT, Venice
 
-Live HTTPS runtime on the existing download-tracker Worker. Advisory only, not a scheduler.
+Live HTTPS runtime on the existing download-tracker Worker. Hosted API
+is stateless: send existing `clicks` to append. The Worker does not
+store a chain.
 
 OpenAPI (ChatGPT GPT Actions / Venice custom HTTP / Grok custom tool):
 
@@ -190,9 +217,9 @@ Setup notes: [https://staticclock-download-tracker.vibelock.workers.dev/ai](http
 MCP catalog (ships separately): `https://aziel-runtime.vibelock.workers.dev/mcp`
 
 ```bash
-curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/advisory \
+curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \
   -H "content-type: application/json" \
-  -d '{"geo": "Indiana", "language": "English"}'
+  -d '{"action": "opened the ledger"}'
 ```
 
 ## License

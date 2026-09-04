@@ -175,14 +175,33 @@ class AdvisePage extends StatefulWidget {
   State<AdvisePage> createState() => _AdvisePageState();
 }
 
+class _Tick {
+  const _Tick(this.click, this.action, this.source);
+  final int click;
+  final String action;
+  final String source;
+}
+
 class _AdvisePageState extends State<AdvisePage> {
   final _geo = TextEditingController(text: 'Indiana');
+  final _action = TextEditingController();
   Advisory? _adv;
+  final List<_Tick> _ticks = [];
 
   @override
   void dispose() {
     _geo.dispose();
+    _action.dispose();
     super.dispose();
+  }
+
+  void _click([String? text, String source = 'local']) {
+    final action = (text ?? _action.text).trim();
+    if (action.isEmpty) return;
+    setState(() {
+      _ticks.add(_Tick(_ticks.length + 1, action, source));
+      if (text == null) _action.clear();
+    });
   }
 
   void _advise() {
@@ -200,6 +219,7 @@ class _AdvisePageState extends State<AdvisePage> {
     setState(() {
       _adv = Advisory(chosen.name, time, date, lang, dialect);
     });
+    _click('advise ${chosen.name}', 'advise');
   }
 
   void _forget() {
@@ -217,14 +237,39 @@ class _AdvisePageState extends State<AdvisePage> {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'It does not help messages travel farther. It helps them arrive intact.',
+            'Every action is a gear click. Time only locks forward.',
             style: TextStyle(color: kGold, fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 8),
           const Text(
-            'Advisory hygiene, not a scheduler. Not targeting. Not analytics. '
-            'One advisory, five fields, then it forgets. No scores. No because.',
+            'Action-based immutable timeline. No rollbacks. AZ-OS hook. '
+            'Author Aziel Eliab. Companion advisory still available.',
           ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _action,
+            decoration: const InputDecoration(labelText: 'Action (one click, no rewind)'),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              FilledButton(onPressed: () => _click(), child: const Text('Click the gear')),
+              const SizedBox(width: 8),
+              OutlinedButton(onPressed: () => _click(_action.text, 'azos'), child: const Text('AZ-OS hook')),
+            ],
+          ),
+          if (_ticks.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: SelectableText(
+                  _ticks.map((t) => '${t.click}  ${t.source}  ${t.action}').join('\n'),
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 14, height: 1.5),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           TextField(
             controller: _geo,

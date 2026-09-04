@@ -4,20 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "staticclock"
-version = "0.1.0"
-description = "Chrono-linguistic release advisory: least-distorting window for information by timezone, language, and dialect (StaticClock, 2026). Advisory only — not a scheduler."
+version = "0.2.0"
+description = "Action-based immutable timeline: every action is a gear click that locks forward. No rollbacks. AZ-OS hook. Author Aziel Eliab."
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [{name = "Aziel Eliab"}]
 requires-python = ">=3.10"
 keywords = [
+    "timeline",
+    "immutable",
+    "append-only",
+    "azos",
+    "gear-click",
     "advisory",
     "timezone",
-    "language",
-    "dialect",
-    "release-window",
     "chronolect",
-    "privacy",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

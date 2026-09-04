@@ -2,8 +2,9 @@
 
 Default analytical window is 08:30–10:30 local. v0.1 documents three
 regional overrides for later cultural morning starts. All other anchors
-use the default. The picked clock time sits inside the window. This is
-not a scheduler and does not optimize for reach.
+use the default. The picked clock time sits inside the window.
+Companion to the gear-click timeline; ChronoLock is the related
+advisory-window product.
 """
 
 from __future__ import annotations
