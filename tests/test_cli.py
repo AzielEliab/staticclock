@@ -110,6 +110,7 @@ def test_help_lists_ui_and_version() -> None:
     assert "version" in text
     assert "click" in text
     assert "hook" in text
+    assert "timeslate" in text
     assert "127.0.0.1:8765" in text or "staticclock ui" in text
 
 

@@ -296,6 +296,17 @@ class Timeline:
         self._clicks = self._clicks + (tick,)
         return tick
 
+    def timeslate(self) -> dict[str, Any] | None:
+        """Timeslate of the tip click, or None on an empty gear.
+
+        TemporalLock binds this cross-hash into its lattice.
+        """
+        if not self._clicks:
+            return None
+        from staticclock.timeslate import timeslate_of
+
+        return timeslate_of(self._clicks[-1])
+
     def verify(self) -> VerifyResult:
         errors: list[str] = []
         n = len(self._clicks)

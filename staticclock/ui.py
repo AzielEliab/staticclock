@@ -79,7 +79,22 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, list_timezones())
             return
         if path == "/api/timeline":
-            self._json(200, {"clicks": _GEAR.to_list(), "length": len(_GEAR), "verify": _GEAR.verify().to_dict()})
+            self._json(
+                200,
+                {
+                    "clicks": _GEAR.to_list(),
+                    "length": len(_GEAR),
+                    "verify": _GEAR.verify().to_dict(),
+                    "timeslate": _GEAR.timeslate(),
+                },
+            )
+            return
+        if path == "/api/timeslate":
+            slate = _GEAR.timeslate()
+            if slate is None:
+                self._json(200, {"empty": True, "timeslate": None})
+                return
+            self._json(200, slate)
             return
         if path == "/api/hook":
             self._json(200, AzosHook(_GEAR).status())
@@ -108,7 +123,15 @@ class Handler(BaseHTTPRequestHandler):
             except NoRollbackError as exc:
                 self._json(400, {"error": str(exc)})
                 return
-            self._json(200, {"click": tick.to_dict(), "clicks": _GEAR.to_list(), "verify": _GEAR.verify().to_dict()})
+            self._json(
+                200,
+                {
+                    "click": tick.to_dict(),
+                    "clicks": _GEAR.to_list(),
+                    "verify": _GEAR.verify().to_dict(),
+                    "timeslate": _GEAR.timeslate(),
+                },
+            )
             return
 
         if path == "/api/hook":
@@ -127,6 +150,7 @@ class Handler(BaseHTTPRequestHandler):
                     "click": tick.to_dict(),
                     "clicks": _GEAR.to_list(),
                     "verify": _GEAR.verify().to_dict(),
+                    "timeslate": _GEAR.timeslate(),
                     "hook": hook.status(),
                 },
             )

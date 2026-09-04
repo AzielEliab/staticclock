@@ -15,6 +15,7 @@ def main() -> None:
     result = gear.verify()
     print(first.to_dict())
     print(hooked.to_dict())
+    print(gear.timeslate())
     print({"ok": result.ok, "length": result.length, "exec": hook.status()["exec"]})
     assert result.ok
     assert result.length == 2

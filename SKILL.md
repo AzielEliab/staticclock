@@ -31,6 +31,7 @@ Ops (do **not** increment downloads or views):
 - `POST /v1/click` — append one click (send existing `clicks` if any)
 - `POST /v1/hook` — AZ-OS hook; records, does not exec
 - `POST /v1/verify` — recompute hashes
+- `POST /v1/timeslate` — tip timeslate; TemporalLock binds this cross-hash into its lattice
 - `POST /v1/advisory` — companion advisory for a last-known geo
 
 There is no rollback. `POST /v1/rollback` returns 400.

@@ -24,6 +24,7 @@ from staticclock.timeline import (
     Timeline,
     VerifyResult,
 )
+from staticclock.timeslate import TIMESLATE_SCHEMA, timeslate_of
 from staticclock.zones import list_timezones
 
 __version__ = "0.2.0"
@@ -38,8 +39,10 @@ __all__ = [
     "NoRollbackError",
     "OUTPUT_FIELDS",
     "StaticClock",
+    "TIMESLATE_SCHEMA",
     "Timeline",
     "VerifyResult",
     "list_timezones",
+    "timeslate_of",
     "__version__",
 ]

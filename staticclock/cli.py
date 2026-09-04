@@ -66,6 +66,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ver.add_argument("--timeline", required=True, help="JSONL path.")
     p_ver.add_argument("--json", action="store_true", dest="as_json", help="Print verify result as JSON.")
 
+    p_ts = sub.add_parser(
+        "timeslate",
+        help="Emit the tip timeslate TemporalLock binds into its lattice.",
+    )
+    p_ts.add_argument("--timeline", required=True, help="JSONL path.")
+    p_ts.add_argument("--json", action="store_true", dest="as_json", help="Print timeslate as JSON.")
+
     p_gen = sub.add_parser("genesis", help="First click of a new JSONL timeline. File must be absent or empty.")
     p_gen.add_argument("--timeline", required=True, help="New JSONL path.")
     p_gen.add_argument("--action", required=True, help="Genesis action.")
@@ -200,6 +207,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             for err in result.errors:
                 print(err, file=sys.stderr)
         return 0 if result.ok else 1
+
+    if args.cmd == "timeslate":
+        gear = Timeline.load(args.timeline)
+        slate = gear.timeslate()
+        if slate is None:
+            print("empty gear", file=sys.stderr)
+            return 2
+        if args.as_json:
+            print(json.dumps(slate, indent=2, ensure_ascii=False))
+        else:
+            print(f"click: {slate['click']}")
+            print(f"second: {slate['second']}")
+            print(f"click_hash: {slate['click_hash']}")
+            print(f"cross_hash: {slate['cross_hash']}")
+            print(f"lattice: {slate['lattice']}")
+        return 0
 
     if args.cmd == "advise":
         clock = StaticClock()

@@ -32,10 +32,18 @@
     var note = document.getElementById("verify-note");
     var list = document.getElementById("ticks");
     count.innerHTML = String(clicks.length) + "<span>clicks</span>";
+    var slate = (payload && payload.timeslate) || null;
+    var slateEl = document.getElementById("timeslate-note");
     if (!clicks.length) {
       note.textContent = "empty gear";
+      if (slateEl) slateEl.textContent = "timeslate: —";
     } else if (verify.ok) {
       note.textContent = "verified · last " + (verify.last_hash || "").slice(0, 12);
+      if (slateEl) {
+        slateEl.textContent = slate && slate.cross_hash
+          ? "timeslate " + slate.cross_hash.slice(0, 16) + " · TemporalLock lattice"
+          : "timeslate: —";
+      }
     } else {
       note.textContent = "broken gear";
     }
@@ -50,7 +58,7 @@
         "<code>" + (tick.hash || "").slice(0, 16) + "</code>";
       list.appendChild(li);
     });
-    lastExport = { product: "staticclock", author: "Aziel Eliab", clicks: clicks, verify: verify };
+    lastExport = { product: "staticclock", author: "Aziel Eliab", clicks: clicks, verify: verify, timeslate: slate };
   }
 
   function refreshTimeline() {

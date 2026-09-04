@@ -284,6 +284,13 @@ Optional local JSONL is append-only (`mode 'a'`). Hosted `/v1` is
 stateless: the caller sends existing `clicks`; the Worker does not
 store a chain.
 
+A **timeslate** is the bindable face of one click. Canonical fields
+`click`, `click_hash`, `product`, `schema`, `second` hash to
+`cross_hash` (schema `staticclock-timeslate-v1`). TemporalLock
+hash-chains that timeslate into a lattice for AZ-OS system integrity.
+StaticClock does not store TemporalLock receipts. CLI:
+`staticclock timeslate`. Hosted: `POST /v1/timeslate`.
+
 ## 16. AZ-OS hook
 
 AZ-OS is a principle-bound remote shell (integrity precedes
@@ -333,7 +340,7 @@ route.
 
 Hosted Worker: `GET /v1/health`, `GET /v1/skill`, `GET /v1/example`,
 `GET /v1/anchors`, `POST /v1/click`, `POST /v1/hook`, `POST /v1/verify`,
-`POST /v1/advisory`. `POST /v1/rollback` returns 400.
+`POST /v1/timeslate`, `POST /v1/advisory`. `POST /v1/rollback` returns 400.
 
 Aziel Eliab
 2026

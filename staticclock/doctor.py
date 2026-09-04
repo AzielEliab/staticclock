@@ -80,6 +80,23 @@ def _check_azos_hook() -> Check:
     return _ok("azos hook", "record only")
 
 
+def _check_timeslate() -> Check:
+    from staticclock.timeslate import LATTICE, timeslate_of
+
+    gear = Timeline()
+    tick = gear.click("opened", source="local", second="2026-09-04T00:00:00Z")
+    slate = timeslate_of(tick)
+    if slate.get("lattice") != LATTICE:
+        return _fail("timeslate", "lattice")
+    if slate.get("click_hash") != tick.hash:
+        return _fail("timeslate", "click_hash")
+    if len(str(slate.get("cross_hash") or "")) != 64:
+        return _fail("timeslate", "cross_hash")
+    if gear.timeslate() != slate:
+        return _fail("timeslate", "tip")
+    return _ok("timeslate", "temporallock bind")
+
+
 def _check_json_roundtrip() -> Check:
     from staticclock.jsonio import export_json, import_json
 
@@ -104,6 +121,7 @@ CHECKS: tuple[Callable[[], Check], ...] = (
     _check_identity,
     _check_gear,
     _check_azos_hook,
+    _check_timeslate,
     _check_json_roundtrip,
 )
 

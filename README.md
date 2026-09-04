@@ -120,6 +120,7 @@ staticclock hook --action "invite accepted" --session azos-1
 staticclock genesis --timeline ticks.jsonl --action "first click"
 staticclock timeline --timeline ticks.jsonl
 staticclock verify --timeline ticks.jsonl
+staticclock timeslate --timeline ticks.jsonl
 staticclock advise --geo "United States"
 staticclock advise --geo "Indiana" --json
 staticclock anchors
@@ -150,12 +151,14 @@ The `android/` and `ios/` folders in this tree are skeleton READMEs until you ru
 ## Library
 
 ```python
-from staticclock import AzosHook, StaticClock, Timeline
+from staticclock import AzosHook, StaticClock, Timeline, timeslate_of
 
 gear = Timeline()
 gear.click("opened the ledger")
 AzosHook(gear).record("invite accepted", session="azos-1")
 assert gear.verify().ok
+slate = gear.timeslate()
+# TemporalLock hash-chains slate["cross_hash"] into its lattice
 # gear.rollback() raises NoRollbackError
 
 with StaticClock(timeline=gear) as clock:

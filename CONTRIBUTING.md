@@ -34,6 +34,7 @@ Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
 ## Where to change things
 
 - Gear / hash / no-rollback: `staticclock/timeline.py`
+- Timeslate cross-hash (TemporalLock lattice bind): `staticclock/timeslate.py`
 - AZ-OS hook: `staticclock/azos.py`
 - Session / advise / forget: `staticclock/engine.py`
 - Top-30 / geo resolve: `staticclock/anchors.py`
