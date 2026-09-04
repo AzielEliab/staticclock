@@ -12,10 +12,13 @@ def test_forget_drops_last_inputs() -> None:
     clock.advise("France")
     assert clock.last_inputs == {"geo": "France"}
     assert clock.nonce is not None
+    assert len(clock.timeline) == 1
     clock.forget()
     assert clock.last_inputs is None
     assert clock.nonce is None
     assert clock.forgotten is True
+    assert len(clock.timeline) == 1
+    assert clock.timeline.verify().ok
 
 
 def test_context_manager_forgets() -> None:

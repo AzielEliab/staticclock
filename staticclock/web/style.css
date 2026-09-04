@@ -1,4 +1,59 @@
-/* StaticClock local UI. No CDN. Advisory hygiene, not strategy. */
+/* StaticClock local UI. No CDN. Action-based immutable timeline. */
+.gear-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin: 0 0 1.25rem;
+}
+.gear-head .count {
+  font-size: 2.4rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin: 0;
+}
+.gear-head .count span {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+ol.ticks {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+ol.ticks li {
+  display: grid;
+  grid-template-columns: 2.2rem 11.5rem 4.5rem 1fr 8.5rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+ol.ticks .tooth { color: var(--mark); font-weight: 600; }
+ol.ticks .src { color: var(--ok); }
+ol.ticks code { color: var(--muted); font-size: 0.75rem; }
+@media (max-width: 640px) {
+  ol.ticks li {
+    grid-template-columns: 2rem 1fr;
+    grid-template-rows: auto auto auto;
+  }
+}
+.row.io {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 1rem 0 1.25rem;
+}
+.row.io button, .row.io label {
+  font: inherit;
+  font-size: 0.9rem;
+}
+#hook-form { margin-top: 1.25rem; }
 :root {
   --ink: #1c1916;
   --paper: #f3eee4;

@@ -1,14 +1,17 @@
 /**
- * StaticClock hosted runtime (port of anchors/engine/chronolect/glossa/polarize).
- * Advisory only, not a scheduler. /v1 never touches DOWNLOADS KV.
+ * StaticClock hosted runtime: append-only gear-click timeline + AZ-OS hook.
+ * Companion advisory remains. /v1 never touches DOWNLOADS KV and never stores a chain.
+ * Author Aziel Eliab.
  */
 import INDEX from "./index-data.json";
 
 const PRODUCT = "staticclock";
-const VERSION = "0.1.0";
-const MOTTO = "It does not help messages travel farther. It helps them arrive intact.";
+const VERSION = "0.2.0";
+const AUTHOR = "Aziel Eliab";
+const MOTTO = "Every action is a gear click. Time only locks forward.";
 const HOST = "https://staticclock-download-tracker.vibelock.workers.dev";
-const SKILL = "---\nname: StaticClock\ndescription: Use when an assistant should pick a least-distorting release window (timezone, language, dialect). Advisory only, not a scheduler. Pointer to ChronoLock; this product still installs its own tarball. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.\n---\n\n# StaticClock\n\nIt does not help messages travel farther. It helps them arrive intact. Renamed to ChronoLock \u2014 this tree is kept and still ships its own tarball.\n\nAuthor: **Aziel Eliab**.\n\nUse when an assistant should pick a least-distorting release window (timezone, language, dialect). Advisory only, not a scheduler. Pointer to ChronoLock; this product still installs its own tarball.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Endpoints (this Worker)\n\nHost: `https://staticclock-download-tracker.vibelock.workers.dev`\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| GET | `/v1/anchors` | List Top-30 geographic anchors. |\n| POST | `/v1/advisory` | One advisory for a last-known geo. Optional language/dialect hints. |\n\nOpenAPI: `https://staticclock-download-tracker.vibelock.workers.dev/openapi.json`\n\nCatalog OpenAPI: `https://aziel-runtime.vibelock.workers.dev/openapi.json`\n\nMCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n\nCatalog aliases under `/p/staticclock/\u2026`.\n\n## How to call (Mozilla/5.0)\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/advisory \\\n  -H 'content-type: application/json' \\\n  -d '{\"geo\":\"Indiana\",\"language\":\"English\"}'\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill\n```\n\nGrok: import the catalog OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash\nstaticclock ui\n```\n\nThen open http://127.0.0.1:8765 (this computer only).\n\n## Honest banner\n\nTHIS IS: chrono-linguistic release advisory (five fields). THIS IS NOT: a scheduler, targeting, analytics, user-profile tool, virality optimizer. Pointer product to ChronoLock; this tree is kept. Author Aziel Eliab.\n\nApache-2.0 (or the repo LICENSE). Forks are welcome and always allowed.\n";
+const GENESIS_PREV_HASH = "0".repeat(64);
+const SKILL = "---\nname: StaticClock\ndescription: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.\n---\n\n# StaticClock\n\nEvery action is a gear click. Time only locks forward.\n\nAuthor: **Aziel Eliab**.\n\n**THIS IS:** an action-based immutable timeline. Each action is a click or second that locks forward. AZ-OS hook records principle-bound actions into the gear.\n\n**THIS IS NOT:** a rollback clock, a remote shell, or ChronoLock. ChronoLock is the related advisory-window product. TemporalLock is observation receipts. Hosted `/v1` does not increment downloads or views and does not store a chain.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://staticclock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n- `GET /v1/health` \u2014 liveness\n- `GET /v1/skill` \u2014 this file\n- `GET /v1/example` \u2014 sample click payload\n- `GET /v1/anchors` \u2014 Top-30 geographic anchors\n- `POST /v1/click` \u2014 append one click (send existing `clicks` if any)\n- `POST /v1/hook` \u2014 AZ-OS hook; records, does not exec\n- `POST /v1/verify` \u2014 recompute hashes\n- `POST /v1/advisory` \u2014 companion advisory for a last-known geo\n\nThere is no rollback. `POST /v1/rollback` returns 400.\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"opened the ledger\"}'\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/hook \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"invite accepted\",\"session\":\"azos-1\"}'\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash\nstaticclock ui\nstaticclock doctor\n```\n\nThen open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify.\n\nCounted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz\nGitHub: https://github.com/AzielEliab/staticclock\n";
 
 const OUTPUT_FIELDS = ["geo_location_chosen", "optimal_time", "optimal_date", "primary_language", "dialect_section"];
 const DEFAULT_ANCHOR = "United States";
@@ -246,7 +249,8 @@ async function advise(geo, languageHint, dialectHint) {
   payload.motto = MOTTO;
   payload.product = PRODUCT;
   payload.version = VERSION;
-  payload.note = "Advisory only. Not a scheduler. One advisory, then forget. No scores, no because.";
+  payload.author = AUTHOR;
+  payload.note = "Companion advisory. ChronoLock is the related window product. Author Aziel Eliab.";
   return payload;
 }
 
@@ -255,7 +259,7 @@ function listAnchors() {
     product: PRODUCT,
     version: VERSION,
     motto: MOTTO,
-    note: "Advisory hygiene, not strategy. Not a scheduler.",
+    note: "Top-30 companion anchors. Author Aziel Eliab.",
     anchors: TOP_30.map((name) => ({
       name,
       iana: INDEX.anchors[name].iana,
@@ -264,17 +268,106 @@ function listAnchors() {
   };
 }
 
+function canonicalClickJson(click, second, action, source, prevHash) {
+  return JSON.stringify({
+    action,
+    click,
+    prev_hash: prevHash,
+    second,
+    source,
+  });
+}
+
+async function sha256Hex(text) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function utcSecond() {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+async function createClick(n, action, source, prevHash, second) {
+  const text = String(action || "").trim();
+  if (!text) throw new Error("action is required");
+  const src = String(source || "local").trim() || "local";
+  const sec = second || utcSecond();
+  const hash = await sha256Hex(canonicalClickJson(n, sec, text, src, prevHash));
+  return { click: n, second: sec, action: text, source: src, prev_hash: prevHash, hash };
+}
+
+function asClicks(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((row) => ({
+    click: Number(row.click),
+    second: String(row.second || ""),
+    action: String(row.action || ""),
+    source: String(row.source || "local"),
+    prev_hash: String(row.prev_hash || ""),
+    hash: String(row.hash || ""),
+  }));
+}
+
+async function verifyClicks(clicks) {
+  const errors = [];
+  for (let i = 0; i < clicks.length; i++) {
+    const tick = clicks[i];
+    const expected = await sha256Hex(
+      canonicalClickJson(tick.click, tick.second, tick.action, tick.source, tick.prev_hash),
+    );
+    if (tick.hash !== expected) errors.push(`index ${i}: stored hash ${tick.hash} != recomputed ${expected}`);
+    if (tick.click !== i + 1) errors.push(`index ${i}: click ${tick.click} != ${i + 1}`);
+    if (i === 0) {
+      if (tick.prev_hash !== GENESIS_PREV_HASH) errors.push("index 0: prev_hash != genesis zeros");
+    } else if (tick.prev_hash !== clicks[i - 1].hash) {
+      errors.push(`index ${i}: prev_hash != previous.hash`);
+    }
+  }
+  return {
+    ok: errors.length === 0,
+    length: clicks.length,
+    first_hash: clicks.length ? clicks[0].hash : null,
+    last_hash: clicks.length ? clicks[clicks.length - 1].hash : null,
+    errors,
+  };
+}
+
+async function appendClick(existing, action, source, second) {
+  const clicks = asClicks(existing);
+  const prev = clicks.length ? clicks[clicks.length - 1].hash : GENESIS_PREV_HASH;
+  const tick = await createClick(clicks.length + 1, action, source, prev, second);
+  const next = clicks.concat([tick]);
+  return { click: tick, clicks: next, verify: await verifyClicks(next) };
+}
+
+function hookStatus(clicks) {
+  const n = clicks.length;
+  return {
+    ok: true,
+    hook: "azos",
+    product: PRODUCT,
+    author: AUTHOR,
+    principle: "Integrity precedes execution.",
+    exec: false,
+    remote_shell: false,
+    rollbacks: false,
+    clicks: n,
+    last_hash: n ? clicks[n - 1].hash : null,
+    note: "Records actions into the StaticClock timeline. Does not exec.",
+  };
+}
+
 function openapiSpec() {
+  const obj = { type: "object" };
   return {
     openapi: "3.1.0",
     info: {
       title: "StaticClock runtime",
       version: VERSION,
-      description: "Chrono-linguistic release advisory. Advisory only, not a scheduler. " + MOTTO,
+      description: "Action-based immutable timeline. No rollbacks. AZ-OS hook. " + MOTTO,
     },
     servers: [{ url: HOST }],
     paths: {
-      
       "/v1/skill": {
         get: {
           operationId: "staticclock_skill",
@@ -282,16 +375,43 @@ function openapiSpec() {
           responses: { "200": { description: "markdown" } },
         },
       },
-"/v1/health": {
-        get: { operationId: "health", summary: "Liveness", responses: { "200": { description: "ok", content: { "application/json": { schema: { type: "object" } } } } } },
+      "/v1/health": {
+        get: { operationId: "health", summary: "Liveness", responses: { "200": { description: "ok", content: { "application/json": { schema: obj } } } } },
+      },
+      "/v1/example": {
+        get: { operationId: "example", summary: "Sample click payload. Does not increment download KV.", responses: { "200": { description: "example", content: { "application/json": { schema: obj } } } } },
       },
       "/v1/anchors": {
-        get: { operationId: "anchors", summary: "List Top-30 geographic anchors.", responses: { "200": { description: "anchors", content: { "application/json": { schema: { type: "object" } } } } } },
+        get: { operationId: "anchors", summary: "List Top-30 geographic anchors.", responses: { "200": { description: "anchors", content: { "application/json": { schema: obj } } } } },
+      },
+      "/v1/click": {
+        post: {
+          operationId: "click",
+          summary: "Append one immutable gear click. Send existing clicks to continue a chain.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["action"], properties: { action: { type: "string" }, source: { type: "string" }, second: { type: "string" }, clicks: { type: "array" } } } } } },
+          responses: { "200": { description: "click", content: { "application/json": { schema: obj } } } },
+        },
+      },
+      "/v1/hook": {
+        post: {
+          operationId: "hook",
+          summary: "AZ-OS hook. Records a principle-bound action. Does not exec.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["action"], properties: { action: { type: "string" }, session: { type: "string" }, principle: { type: "string" }, second: { type: "string" }, clicks: { type: "array" } } } } } },
+          responses: { "200": { description: "hook click", content: { "application/json": { schema: obj } } } },
+        },
+      },
+      "/v1/verify": {
+        post: {
+          operationId: "verify",
+          summary: "Recompute hashes. Anyone can verify. No rollback.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { clicks: { type: "array" } } } } } },
+          responses: { "200": { description: "verify", content: { "application/json": { schema: obj } } } },
+        },
       },
       "/v1/advisory": {
         post: {
           operationId: "advisory",
-          summary: "One advisory for a last-known geo. Optional language/dialect hints.",
+          summary: "Companion advisory for a last-known geo. Optional language/dialect hints.",
           requestBody: {
             required: true,
             content: {
@@ -308,7 +428,7 @@ function openapiSpec() {
               },
             },
           },
-          responses: { "200": { description: "five-field advisory", content: { "application/json": { schema: { type: "object" } } } } },
+          responses: { "200": { description: "companion advisory", content: { "application/json": { schema: obj } } } },
         },
       },
     },
@@ -331,12 +451,12 @@ function aiHtml() {
 <body>
   <h1>StaticClock live API</h1>
   <p class="motto">${MOTTO}</p>
-  <p>Advisory only. Not a scheduler, not targeting, not analytics.</p>
+  <p>Action-based immutable timeline. No rollbacks. AZ-OS hook. Author Aziel Eliab.</p>
   <h2>ChatGPT (GPT Actions)</h2>
   <p>Paste this OpenAPI URL into GPT Actions:</p>
   <p><code>${HOST}/openapi.json</code></p>
   <h2>Grok / xAI</h2>
-  <p>Custom tool pointing at <code>GET ${HOST}/v1/anchors</code> and <code>POST ${HOST}/v1/advisory</code>.</p>
+  <p>Custom tool pointing at <code>POST ${HOST}/v1/click</code>, <code>POST ${HOST}/v1/hook</code>, and <code>POST ${HOST}/v1/verify</code>.</p>
   <h2>Venice</h2>
   <p>Custom HTTP tool from the same OpenAPI URL.</p>
   <h2>MCP catalog</h2>
@@ -351,7 +471,16 @@ export async function handleRuntimeApi(request, url) {
   const isApi = path === "/v1" || path.startsWith("/v1/") || path === "/openapi.json" || path === "/ai";
   if (!isApi) return null;
   if (path === "/v1/health" && request.method === "GET") {
-    return json({ ok: true, product: PRODUCT, version: VERSION });
+    return json({
+      ok: true,
+      product: PRODUCT,
+      version: VERSION,
+      author: AUTHOR,
+      motto: MOTTO,
+      identity: "action-based immutable timeline",
+      rollbacks: false,
+      azos_hook: true,
+    });
   }
   if (path === "/v1/skill" && request.method === "GET") {
     return new Response(SKILL, {
@@ -359,11 +488,66 @@ export async function handleRuntimeApi(request, url) {
       headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "private, no-store", ...corsHeaders() },
     });
   }
+  if (path === "/v1/example" && request.method === "GET") {
+    const sample = await appendClick([], "opened the ledger", "local", "2026-09-04T12:00:00Z");
+    return json({
+      product: PRODUCT,
+      version: VERSION,
+      author: AUTHOR,
+      motto: MOTTO,
+      clicks: sample.clicks,
+      note: "Sample genesis click. Hosted API is stateless. Author Aziel Eliab.",
+    });
+  }
   if (path === "/openapi.json" && request.method === "GET") return json(openapiSpec());
   if (path === "/ai" && request.method === "GET") {
     return new Response(aiHtml(), { headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders() } });
   }
   if (path === "/v1/anchors" && request.method === "GET") return json(listAnchors());
+  if ((path === "/v1/rollback" || path === "/v1/rewind") && request.method === "POST") {
+    return json({ error: "the gear does not rewind", rollbacks: false, author: AUTHOR }, 400);
+  }
+  if (path === "/v1/click" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "JSON body required" }, 400); }
+    const action = body && body.action != null ? String(body.action) : "";
+    if (!action.trim()) return json({ error: "action is required" }, 400);
+    try {
+      const out = await appendClick(body.clicks, action, body.source || "local", body.second);
+      return json({ product: PRODUCT, version: VERSION, author: AUTHOR, motto: MOTTO, ...out });
+    } catch (err) {
+      return json({ error: String(err.message || err) }, 400);
+    }
+  }
+  if (path === "/v1/hook" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "JSON body required" }, 400); }
+    let action = body && body.action != null ? String(body.action).trim() : "";
+    if (!action) return json({ error: "action is required" }, 400);
+    const session = body && body.session ? String(body.session).trim() : "";
+    const principle = body && body.principle ? String(body.principle).trim() : "";
+    if (session) action = `${action} [session:${session}]`;
+    if (principle && principle !== "Integrity precedes execution.") action = `${action} [principle:${principle}]`;
+    try {
+      const out = await appendClick(body.clicks, action, "azos", body.second);
+      return json({
+        product: PRODUCT,
+        version: VERSION,
+        author: AUTHOR,
+        motto: MOTTO,
+        ...out,
+        hook: hookStatus(out.clicks),
+      });
+    } catch (err) {
+      return json({ error: String(err.message || err) }, 400);
+    }
+  }
+  if (path === "/v1/verify" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "JSON body required" }, 400); }
+    const result = await verifyClicks(asClicks(body && body.clicks));
+    return json({ product: PRODUCT, version: VERSION, author: AUTHOR, ...result });
+  }
   if (path === "/v1/advisory" && request.method === "POST") {
     let body;
     try { body = await request.json(); } catch { return json({ error: "JSON body required" }, 400); }

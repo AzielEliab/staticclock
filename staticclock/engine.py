@@ -1,7 +1,7 @@
-"""StaticClock engine: one advisory, then forget.
+"""StaticClock engine: advise companion plus the immutable gear.
 
-In-memory session only. No sqlite, no ``.staticclock`` store, no user
-id, no outcome optimization. User-facing output is exactly five fields.
+The advisory session still forgets its nonce and last-known geo.
+``forget()`` does not rewind the timeline. Every advise is also a click.
 """
 
 from __future__ import annotations
@@ -9,11 +9,14 @@ from __future__ import annotations
 import json
 import secrets
 from dataclasses import asdict, dataclass
+
 from staticclock.anchors import basket_of, resolve_geo
+from staticclock.azos import AzosHook
 from staticclock.chronolect import local_date, pick_time
 from staticclock.glossa import pick_dialect, primary_language
 from staticclock.index import record
 from staticclock.polarize import shake
+from staticclock.timeline import Click, Timeline
 
 OUTPUT_FIELDS: tuple[str, ...] = (
     "geo_location_chosen",
@@ -48,7 +51,6 @@ class Advisory:
     def to_dict(self) -> dict[str, str]:
         payload = asdict(self)
         if tuple(payload.keys()) != OUTPUT_FIELDS:
-            # dataclass field order is the contract
             payload = {k: payload[k] for k in OUTPUT_FIELDS}
         extra = set(payload) - set(OUTPUT_FIELDS)
         if extra:
@@ -67,19 +69,33 @@ class Advisory:
 
 
 class StaticClock:
-    """In-memory advisory session.
+    """Action session: append-only gear plus an optional advisory companion.
 
-    ``nonce`` is a test hook. Production callers omit it; a one-shot
-    nonce is drawn from ``secrets.token_bytes``. After ``advise()``,
-    call ``forget()`` to drop nonce and inputs. The returned Advisory
-    is a snapshot the caller holds; the engine does not keep it.
+    ``nonce`` is a test hook for advise(). Production callers omit it.
+    After ``advise()``, ``forget()`` drops nonce and inputs. The gear
+    stays. There is no rollback.
     """
 
-    def __init__(self, nonce: bytes | None = None) -> None:
+    def __init__(
+        self,
+        nonce: bytes | None = None,
+        timeline: Timeline | None = None,
+    ) -> None:
         self._pin = nonce
         self._nonce: bytes | None = None
         self._last_inputs: dict[str, str] | None = None
         self._forgotten = False
+        self._timeline = timeline if timeline is not None else Timeline()
+
+    @property
+    def timeline(self) -> Timeline:
+        return self._timeline
+
+    def azos_hook(self) -> AzosHook:
+        return AzosHook(self._timeline)
+
+    def click(self, action: str, *, source: str = "local") -> Click:
+        return self._timeline.click(action, source=source)
 
     def advise(self, geo: str) -> Advisory:
         nonce = self._pin if self._pin is not None else secrets.token_bytes(16)
@@ -96,16 +112,18 @@ class StaticClock:
         clock = pick_time(chosen, nonce)
         day = local_date(str(rec["iana"]))
 
-        return Advisory(
+        advisory = Advisory(
             geo_location_chosen=chosen,
             optimal_time=clock,
             optimal_date=day.isoformat(),
             primary_language=language,
             dialect_section=dialect,
         )
+        self._timeline.click(f"advise {chosen}", source="advise")
+        return advisory
 
     def forget(self) -> None:
-        """Drop nonce and last inputs. Irreversible for this moment."""
+        """Drop nonce and last advisory inputs. Does not rewind the gear."""
         self._nonce = None
         self._last_inputs = None
         self._forgotten = True

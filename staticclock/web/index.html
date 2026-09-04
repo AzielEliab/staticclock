@@ -3,22 +3,71 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StaticClock — release advisory</title>
+  <title>StaticClock — immutable timeline</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
-    <div class="tag">StaticClock · v0.1.0 · loopback</div>
-    <h1>When should this be released so it is read, not reacted to?</h1>
+    <div class="tag">StaticClock · v0.2.0 · loopback · AZ-OS hook</div>
+    <h1>Every action is a gear click. Time only locks forward.</h1>
     <p class="lede">
-      Advisory only. Least-distorting window by timezone, language, and
-      dialect. Not a scheduler, not a targeting system, not analytics.
-      One moment; then forgotten. No memory of past advisories.
+      Action-based immutable timeline. No rollbacks. Each action is a
+      click — a second that stays. AZ-OS records principle-bound
+      actions into this gear. Author Aziel Eliab.
     </p>
   </header>
   <hr class="rule">
 
+  <section class="gear-head">
+    <p class="count" id="click-count">0<span>clicks</span></p>
+    <p class="note" id="verify-note">empty gear</p>
+  </section>
+
+  <form id="click-form" autocomplete="off">
+    <div class="row">
+      <label for="action">
+        <span class="kicker">Action</span>
+        One click. One second. It will not rewind.
+      </label>
+      <input id="action" name="action" type="text" placeholder="opened the ledger" spellcheck="false">
+    </div>
+    <button class="advise" type="submit" id="go-click">Click the gear</button>
+  </form>
+
+  <form id="hook-form" autocomplete="off">
+    <div class="row">
+      <label for="hook-action">
+        <span class="kicker">AZ-OS hook</span>
+        Records into the timeline. Does not exec. Does not open a shell.
+      </label>
+      <input id="hook-action" name="hook-action" type="text" placeholder="invite accepted" spellcheck="false">
+    </div>
+    <div class="row">
+      <label for="hook-session">
+        <span class="kicker">Session label</span>
+        Optional. Bound to AZ-OS principles.
+      </label>
+      <input id="hook-session" name="hook-session" type="text" placeholder="azos-1" spellcheck="false">
+    </div>
+    <button class="advise" type="submit" id="go-hook">Record via AZ-OS</button>
+  </form>
+
+  <div class="row io">
+    <button type="button" id="verify-btn">Verify</button>
+    <label>Import JSON <input type="file" id="import-json" accept="application/json,.json"></label>
+    <button type="button" id="export-json">Export JSON</button>
+  </div>
+
+  <section class="output" aria-live="polite">
+    <h2>Timeline</h2>
+    <ol class="ticks" id="ticks"></ol>
+    <p class="note">Append-only. A later click may mention an earlier hash. The old click stays.</p>
+  </section>
+
+  <hr class="rule">
+
   <form id="advise-form" autocomplete="off">
+    <p class="lede">Companion advisory (also clicks the gear). ChronoLock is the related window product.</p>
     <div class="row">
       <label for="geo">
         <span class="kicker">Last-known geo</span>
@@ -37,14 +86,10 @@
       </select>
     </div>
     <button class="advise" type="submit" id="go">Advise</button>
-    <div class="row io">
-      <label>Import JSON <input type="file" id="import-json" accept="application/json,.json"></label>
-      <button type="button" id="export-json">Export JSON</button>
-    </div>
   </form>
 
   <section class="output" aria-live="polite">
-    <h2>Advisory</h2>
+    <h2>Companion advisory</h2>
     <dl class="fields">
       <dt>geo location chosen</dt>
       <dd id="out-geo" class="empty">—</dd>
@@ -57,12 +102,11 @@
       <dt>dialect section</dt>
       <dd id="out-dialect" class="empty">—</dd>
     </dl>
-    <p class="note">Five fields. No scores, no confidence, no alternatives, no because.</p>
   </section>
 
   <section class="zones">
     <h2>Timezone reference</h2>
-    <p>Read-only. Computed locally with IANA zoneinfo. Listing zones does not change the advisory.</p>
+    <p>Read-only. Computed locally with IANA zoneinfo.</p>
     <table>
       <thead>
         <tr>
@@ -78,7 +122,7 @@
   </section>
 
   <footer>
-    <p><strong>It does not help messages travel farther. It helps them arrive intact.</strong></p>
+    <p><strong>Every action is a gear click. Time only locks forward.</strong></p>
     <p>Apache-2.0 · Aziel Eliab · 2026 · Bound to 127.0.0.1 · Forks welcome and always allowed.</p>
   </footer>
   <script src="/app.js"></script>

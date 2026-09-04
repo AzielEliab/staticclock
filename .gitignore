@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 dist/
 *.egg-info/
+.staticclock-state.json
 .pytest_cache/
 examples/_out
 node_modules/
