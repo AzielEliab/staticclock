@@ -100,6 +100,14 @@ A companion advisory (`advise`) still names a geo, local time, date,
 language, and dialect. That call also clicks the gear. ChronoLock is
 the public name of the advisory-window product.
 
+### Timeslate (TemporalLock lattice)
+
+Each click has a timeslate (`staticclock-timeslate-v1`). Canonical
+fields `click`, `click_hash`, `product`, `schema`, `second` hash to
+`cross_hash`. TemporalLock hash-chains that timeslate into its lattice
+for AZ-OS system integrity — put `bind.evidence` on a TemporalLock
+receipt. StaticClock does not store TemporalLock receipts.
+
 ## Install
 
 Python 3.10+. Stdlib only in the core (`zoneinfo`, `secrets`, `hashlib`).
@@ -158,7 +166,8 @@ gear.click("opened the ledger")
 AzosHook(gear).record("invite accepted", session="azos-1")
 assert gear.verify().ok
 slate = gear.timeslate()
-# TemporalLock hash-chains slate["cross_hash"] into its lattice
+# TemporalLock genesis/append uses slate["bind"]:
+#   summary, evidence, confidence=1.0, timestamp=click second
 # gear.rollback() raises NoRollbackError
 
 with StaticClock(timeline=gear) as clock:

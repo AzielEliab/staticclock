@@ -222,6 +222,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"click_hash: {slate['click_hash']}")
             print(f"cross_hash: {slate['cross_hash']}")
             print(f"lattice: {slate['lattice']}")
+            print(f"evidence: {slate['evidence']}")
         return 0
 
     if args.cmd == "advise":

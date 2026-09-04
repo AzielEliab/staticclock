@@ -24,7 +24,7 @@ from staticclock.timeline import (
     Timeline,
     VerifyResult,
 )
-from staticclock.timeslate import TIMESLATE_SCHEMA, timeslate_of
+from staticclock.timeslate import TIMESLATE_SCHEMA, bind_evidence, timeslate_of, verify_timeslate
 from staticclock.zones import list_timezones
 
 __version__ = "0.2.0"
@@ -43,6 +43,8 @@ __all__ = [
     "Timeline",
     "VerifyResult",
     "list_timezones",
+    "bind_evidence",
     "timeslate_of",
+    "verify_timeslate",
     "__version__",
 ]

@@ -284,12 +284,36 @@ Optional local JSONL is append-only (`mode 'a'`). Hosted `/v1` is
 stateless: the caller sends existing `clicks`; the Worker does not
 store a chain.
 
-A **timeslate** is the bindable face of one click. Canonical fields
-`click`, `click_hash`, `product`, `schema`, `second` hash to
-`cross_hash` (schema `staticclock-timeslate-v1`). TemporalLock
-hash-chains that timeslate into a lattice for AZ-OS system integrity.
-StaticClock does not store TemporalLock receipts. CLI:
-`staticclock timeslate`. Hosted: `POST /v1/timeslate`.
+## 15a. Timeslate cross-hash (TemporalLock lattice)
+
+StaticClock gear-clicks are the immutable ticks. TemporalLock
+hash-chains those ticks into a timeslate lattice for AZ-OS system
+integrity. This tree ships the StaticClock side only.
+
+A **timeslate** is the bindable face of one click (schema
+`staticclock-timeslate-v1`). Canonical fields, sorted JSON, no extra
+whitespace:
+
+- `click`
+- `click_hash` (the click's own SHA-256)
+- `product` (`staticclock`)
+- `schema`
+- `second`
+
+`cross_hash` is SHA-256 of that encoding. `evidence` is one line
+TemporalLock may put on a receipt:
+
+```
+schema=staticclock-timeslate-v1 product=staticclock lattice=temporallock click=N second=... click_hash=... cross_hash=...
+```
+
+`bind` is the TemporalLock-shaped payload: `summary`, `evidence`,
+`confidence` 1.0, `timestamp` equal to the click's `second`.
+`Timeline.timeslates()` returns one timeslate per click. Anyone can
+`verify_timeslate`. StaticClock does not store TemporalLock receipts
+and does not exec.
+
+CLI: `staticclock timeslate`. Hosted: `POST /v1/timeslate`.
 
 ## 16. AZ-OS hook
 
@@ -329,6 +353,7 @@ staticclock hook --action "invite accepted"
 staticclock genesis --timeline ticks.jsonl --action "first"
 staticclock timeline --timeline ticks.jsonl
 staticclock verify --timeline ticks.jsonl
+staticclock timeslate --timeline ticks.jsonl
 staticclock advise --geo "Indiana"
 staticclock ui
 ```

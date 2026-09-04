@@ -94,6 +94,12 @@ def _check_timeslate() -> Check:
         return _fail("timeslate", "cross_hash")
     if gear.timeslate() != slate:
         return _fail("timeslate", "tip")
+    from staticclock.timeslate import verify_timeslate
+
+    if not verify_timeslate(slate) or "cross_hash=" not in str(slate.get("evidence")):
+        return _fail("timeslate", "evidence")
+    if len(gear.timeslates()) != 1:
+        return _fail("timeslate", "lattice length")
     return _ok("timeslate", "temporallock bind")
 
 

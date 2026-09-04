@@ -307,6 +307,12 @@ class Timeline:
 
         return timeslate_of(self._clicks[-1])
 
+    def timeslates(self) -> list[dict[str, Any]]:
+        """Timeslate for every click. TemporalLock lattice binds each one."""
+        from staticclock.timeslate import timeslate_of
+
+        return [timeslate_of(tick) for tick in self._clicks]
+
     def verify(self) -> VerifyResult:
         errors: list[str] = []
         n = len(self._clicks)

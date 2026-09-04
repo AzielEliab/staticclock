@@ -62,9 +62,23 @@ def cross_hash(
     ).hexdigest()
 
 
+def bind_evidence(*, click: int, second: str, click_hash: str, digest: str) -> str:
+    """Single-line evidence TemporalLock puts on a receipt. Non-empty by contract."""
+    return (
+        f"schema={TIMESLATE_SCHEMA} product={PRODUCT} lattice={LATTICE} "
+        f"click={int(click)} second={second} click_hash={click_hash} cross_hash={digest}"
+    )
+
+
 def timeslate_of(tick: Click) -> dict[str, Any]:
     """Return the timeslate TemporalLock binds to for one click."""
     digest = cross_hash(click=tick.click, click_hash=tick.hash, second=tick.second)
+    evidence = bind_evidence(
+        click=tick.click,
+        second=tick.second,
+        click_hash=tick.hash,
+        digest=digest,
+    )
     return {
         "schema": TIMESLATE_SCHEMA,
         "product": PRODUCT,
@@ -76,8 +90,29 @@ def timeslate_of(tick: Click) -> dict[str, Any]:
         "lattice": LATTICE,
         "azos": True,
         "rollbacks": False,
+        "evidence": evidence,
+        "bind": {
+            "product": LATTICE,
+            "uses": "evidence",
+            "summary": f"staticclock timeslate click {tick.click}",
+            "evidence": evidence,
+            "confidence": 1.0,
+            "timestamp": tick.second,
+        },
         "note": (
             "TemporalLock hash-chains this timeslate into its lattice. "
             "StaticClock does not store TemporalLock receipts."
         ),
     }
+
+
+def verify_timeslate(slate: dict[str, Any]) -> bool:
+    """Recompute cross_hash from core fields. Anyone can verify."""
+    expected = cross_hash(
+        click=int(slate["click"]),
+        click_hash=str(slate["click_hash"]),
+        second=str(slate["second"]),
+        product=str(slate.get("product") or PRODUCT),
+        schema=str(slate.get("schema") or TIMESLATE_SCHEMA),
+    )
+    return expected == str(slate.get("cross_hash") or "") and bool(slate.get("evidence"))
