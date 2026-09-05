@@ -1,4 +1,9 @@
 {
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/homepage.test.mjs"
+  },
   "dependencies": {
     "wrangler": "^4.127.1"
   }

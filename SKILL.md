@@ -62,4 +62,5 @@ staticclock doctor
 Then open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify.
 
 Counted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz
+Product homepage (workspace + install): https://staticclock-download-tracker.vibelock.workers.dev/
 GitHub: https://github.com/AzielEliab/staticclock

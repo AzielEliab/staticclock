@@ -33,7 +33,8 @@ The script curls the **counted** tarball from this project's Worker
 (`/download`, User-Agent `Mozilla/5.0`), extracts, makes a venv, and
 `pip install -e .`. Then run `staticclock ui`.
 
-Or tap **Download** / **One-click install** on the Worker homepage:
+Or tap **Download** / **One-click install** on the Worker homepage
+(complete product UI: workspace + counted download):
 https://staticclock-download-tracker.vibelock.workers.dev/
 
 ## Counted download (Cloudflare Worker)
