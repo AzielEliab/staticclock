@@ -1,4 +1,5 @@
 import { handleRuntimeApi } from "./runtime.js";
+import { CITE, renderHomepage } from "./homepage.js";
 
 /**
  * StaticClock download tracker (Cloudflare Worker).
@@ -21,10 +22,8 @@ const DEFAULT_OWNER = "AzielEliab";
 const DEFAULT_REPO = "staticclock";
 const DEFAULT_BRANCH = "main";
 const GITHUB_RELEASES = "https://github.com/AzielEliab/staticclock/releases";
-const GITHUB_LATEST = "https://github.com/AzielEliab/staticclock/releases/latest";
 const HOST = "https://staticclock-download-tracker.vibelock.workers.dev";
 const GITHUB_REPO = "https://github.com/AzielEliab/staticclock";
-const INSTALL_LINE = "curl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash";
 
 
 function corsHeaders() {
@@ -298,97 +297,13 @@ async function serveAsset(request, env, asset, { head = false } = {}) {
 
 async function indexHtml(env) {
   const stats = await collectStats(env);
-  const views = Number(stats.views) || 0;
-  const downloads = Number(stats.downloads != null ? stats.downloads : stats.total) || 0;
-  const v = views.toLocaleString("en-US");
-  const n = downloads.toLocaleString("en-US");
-  const gh = stats.github || {};
-  const breakdown = (stats.breakdown || [])
-    .map(
-      (b) =>
-        `<li><code>${b.owner}/${b.repo}</code> branch <code>${b.branch}</code> fork=${b.fork} → ${b.count}</li>`,
-    )
-    .join("") || "<li>none yet</li>";
-  return `<!doctype html>
-<html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StaticClock downloads</title>
-<style>
-  :root { color-scheme: dark; }
-  body { font: 16px/1.45 system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem 4rem; background: #0e1014; color: #e8eaef; }
-  h1 { font-size: 1.75rem; margin: 0 0 .35rem; }
-  .motto { color: #9aa3b2; margin: 0 0 1.5rem; }
-  .card { border: 1px solid #2a3140; border-radius: 12px; padding: 1.25rem 1.35rem; background: #151922; }
-  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 0 0 1rem; }
-  .count { font-size: 2.2rem; font-variant-numeric: tabular-nums; font-weight: 700; margin: 0; }
-  .count span { display: block; font-size: .95rem; font-weight: 500; color: #9aa3b2; }
-  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 0 0 .85rem; }
-  @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
-  a.btn, button.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.2rem; font-weight: 750; padding: 1rem 1.1rem; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none; }
-  a.btn.primary { background: #e8eaef; color: #0e1014; }
-  button.btn.install { background: #c9a227; color: #14110a; }
-  button.btn.install.copied { background: #7dcf9a; color: #0e1014; }
-  .kid { font-size: 1.05rem; margin: 0 0 1rem; }
-  .meta { margin-top: 1.1rem; color: #9aa3b2; font-size: .92rem; }
-  .meta a { color: #c9d4ff; }
-  .iso { margin-top: .85rem; font-size: .85rem; color: #7d8696; }
-  .banner { border: 1px solid #5c4a1a; background: #241c0d; color: #f0d78c; padding: .85rem 1rem; border-radius: 8px; margin: 0 0 1.2rem; font-size: .92rem; }
-  pre { background: #0e1014; padding: .75rem .9rem; overflow: auto; border-radius: 8px; font-size: .82rem; }
-  code { font-size: .88rem; }
-</style>
-<body>
-  <h1>StaticClock</h1>
-  <p class="motto">Every action is a gear click. Time only locks forward. Author Aziel Eliab.</p>
-  <p class="banner">THIS IS: an action-based immutable timeline — every action is a gear click or second that locks forward. AZ-OS hook. THIS IS NOT: a rollback clock, a remote shell, or ChronoLock. Related: ChronoLock (advisory window). Distinct from TemporalLock (observation receipts). Author Aziel Eliab.</p>
-  <div class="card">
-    <div class="nums">
-      <p class="count">${v}<span>Views</span></p>
-      <p class="count">${n}<span>Downloads</span></p>
-    </div>
-    <p class="kid"><strong>Two big buttons.</strong> Download saves the gzip (the Downloads number goes up). One-click install copies a Terminal command. After it finishes, type <code>staticclock ui</code>.</p>
-    <div class="btns">
-      <a class="btn primary dl" href="/download?asset=${DEFAULT_ASSET}">Download</a>
-      <button type="button" class="btn install" id="install-btn">One-click install</button>
-    </div>
-    <pre id="install-cmd">${INSTALL_LINE}</pre>
-    <p class="kid">Then run: <code>staticclock ui</code> and open http://127.0.0.1:8765 (this computer only). Click the gear. Optional AZ-OS hook.</p>
-    <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${DEFAULT_ASSET} — ${n} counted.</p>
-    <p class="iso">Isolated counter: Worker <code>staticclock-download-tracker</code>, project <code>${PROJECT}</code>, KV <code>STATICCLOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
-    <p class="meta">GitHub: stars ${gh.stars || 0} · forks ${gh.forks || 0} · watchers ${gh.watchers || 0} · release assets ${gh.release_download_count || 0}</p>
-    
-    <p class="meta"><a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
-    <script>
-      (function () {
-        var cmd = "curl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash";
-        var btn = document.getElementById("install-btn");
-        var pre = document.getElementById("install-cmd");
-        if (!btn) return;
-        btn.addEventListener("click", function () {
-          function done(ok) {
-            btn.textContent = ok ? "Copied! Paste in Terminal, then run staticclock ui" : "Select the command, copy it, then run staticclock ui";
-            btn.classList.add("copied");
-          }
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(cmd).then(function () { done(true); }).catch(function () { done(false); });
-          } else {
-            done(false);
-            if (pre && window.getSelection) {
-              var r = document.createRange();
-              r.selectNodeContents(pre);
-              var sel = window.getSelection();
-              sel.removeAllRanges();
-              sel.addRange(r);
-            }
-          }
-        });
-      })();
-    </script>
-    <h2>Per repo / branch / fork</h2>
-    <ul>${breakdown}</ul>
-  </div>
-</body>
-</html>`;
+  return renderHomepage({
+    views: Number(stats.views) || 0,
+    downloads: Number(stats.downloads != null ? stats.downloads : stats.total) || 0,
+    breakdown: stats.breakdown || [],
+    github: stats.github || {},
+    asset: DEFAULT_ASSET,
+  });
 }
 
 export default {
@@ -469,6 +384,28 @@ export default {
       dims.asset = asset;
       if (request.method === "GET") await increment(env, dims);
       return serveAsset(request, env, asset, { head: request.method === "HEAD" });
+    }
+
+    if ((url.pathname === "/robots.txt" || url.pathname === "/robots.txt/") && request.method === "GET") {
+      const body = "User-agent: *\nAllow: /\nSitemap: " + HOST + "/sitemap.xml\n";
+      return new Response(body, {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() },
+      });
+    }
+    if ((url.pathname === "/sitemap.xml" || url.pathname === "/sitemap.xml/") && request.method === "GET") {
+      const locs = [HOST + "/", HOST + "/download", HOST + "/install.sh", HOST + "/v1/skill", HOST + "/openapi.json", GITHUB_REPO];
+      const xml =
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+        locs.map((u) => "  <url><loc>" + u + "</loc></url>").join("\n") +
+        "\n</urlset>\n";
+      return new Response(xml, {
+        status: 200,
+        headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() },
+      });
+    }
+    if ((url.pathname === "/cite.json" || url.pathname === "/cite.json/") && request.method === "GET") {
+      return json(CITE);
     }
 
     return json({ error: "not found" }, 404);
