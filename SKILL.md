@@ -36,7 +36,11 @@ Ops (do **not** increment downloads or views):
 
 There is no rollback. `POST /v1/rollback` returns 400.
 
-Grok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.
+## Use with AI assistants
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
+
+Import the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Author Aziel Eliab only.
 
 ## Example
 
