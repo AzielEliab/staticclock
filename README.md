@@ -201,13 +201,21 @@ examples/             click once; advise once
 mobile/               Flutter iPhone + Android (`flutter create .`)
 ```
 
-## Use with Grok, ChatGPT, Venice
+## Use with AI assistants
 
 Live HTTPS runtime on the existing download-tracker Worker. Hosted API
 is stateless: send existing `clicks` to append. The Worker does not
 store a chain.
 
-OpenAPI (ChatGPT GPT Actions / Venice custom HTTP / Grok custom tool):
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude
+(Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot /
+Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence
+surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other
+MCP/OpenAPI-capable assistants. Author Aziel Eliab only.
+
+OpenAPI import (ChatGPT GPT Actions, Claude connectors, Copilot /
+Gemini OpenAPI tools, Grok custom tools, Venice HTTP tools, and any
+OpenAPI-capable client):
 
 ```
 https://staticclock-download-tracker.vibelock.workers.dev/openapi.json
@@ -215,7 +223,7 @@ https://staticclock-download-tracker.vibelock.workers.dev/openapi.json
 
 Setup notes: [https://staticclock-download-tracker.vibelock.workers.dev/ai](https://staticclock-download-tracker.vibelock.workers.dev/ai)
 
-MCP catalog (ships separately): `https://aziel-runtime.vibelock.workers.dev/mcp`
+MCP catalog (Cursor, Glama, Claude, and other MCP clients): `https://aziel-runtime.vibelock.workers.dev/mcp`
 
 ```bash
 curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \
