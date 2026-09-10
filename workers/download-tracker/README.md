@@ -13,6 +13,9 @@ GET `/download` increments **downloads**.
 `/v1` never increments DOWNLOADS KV.
 GET `/install.sh` one-click install (does not increment; script curls `/download`).
 GET `/v1/skill` returns skill markdown (`text/markdown`). Does not increment views or downloads.
+`/v1/mesh/*` PROXY to aziel-runtime suite mesh (`AZIEL_RUNTIME` / `https://aziel-runtime.vibelock.workers.dev`). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Human UI Live Nodes strip polls `GET /v1/mesh`.
+
+Verify: `curl -sS -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh/status` returns MESH-OK style JSON with `enabled: false` by default.
 GET `/cite.json` citation record (`doi` is `null` — no invented Zenodo DOI).
 GET `/robots.txt` and `/sitemap.xml` for crawlers.
 

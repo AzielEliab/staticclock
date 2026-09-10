@@ -367,6 +367,12 @@ Hosted Worker: `GET /v1/health`, `GET /v1/skill`, `GET /v1/example`,
 `GET /v1/anchors`, `POST /v1/click`, `POST /v1/hook`, `POST /v1/verify`,
 `POST /v1/timeslate`, `POST /v1/advisory`. `POST /v1/rollback` returns 400.
 
+The Worker homepage shows a suite Live Nodes strip. `/v1/mesh/*` PROXY
+to aziel-runtime. Suite mesh default OFF. QNM rollup is
+live|locked|isolated counts only. No Node Gate. No auto-heal. Not an
+anonymity network. Anon-broadcast is not a publish path. StaticClock
+remains an action-based immutable timeline (Plain category, not Lock).
+
 Aziel Eliab
 2026
 Apache-2.0

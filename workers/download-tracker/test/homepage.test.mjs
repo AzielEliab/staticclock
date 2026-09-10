@@ -43,4 +43,11 @@ test("homepage keeps download, install, workspace, and honest banners", () => {
   assert.match(html, /THIS IS NOT:/);
   assert.match(html, /does not store a chain/);
   assert.match(html, /AzielEliab\/staticclock/);
+  assert.match(html, /id="meshStrip"/);
+  assert.match(html, /Live Nodes/);
+  assert.match(html, /QNM-BUILD-1.0/);
+  assert.match(html, /No Node Gate/);
+  assert.match(html, /Plain category \(not Lock\)/);
+  assert.match(html, /href="\/v1\/mesh"/);
+  assert.doesNotMatch(html, /id="node-gate"/);
 });

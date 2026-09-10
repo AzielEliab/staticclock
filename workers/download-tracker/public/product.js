@@ -367,3 +367,105 @@
   loadAnchors();
   refreshHealth().catch(function () { /* pill already marked */ });
 })();
+
+(function () {
+  if (!document.getElementById("meshStrip")) return;
+  function $(id) { return document.getElementById(id); }
+  function meshNum() {
+    for (var i = 0; i < arguments.length; i++) {
+      var raw = arguments[i];
+      if (raw == null || raw === "") continue;
+      var n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, ""));
+      if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+    }
+    return 0;
+  }
+  function unwrapMesh(j) {
+    if (!j || typeof j !== "object") return {};
+    if (j.result && typeof j.result === "object") return Object.assign({}, j, j.result);
+    if (j.mesh && typeof j.mesh === "object") return Object.assign({}, j, j.mesh);
+    return j;
+  }
+  function paintMesh(raw) {
+    var j = unwrapMesh(raw);
+    var on = j.enabled === true || j.enabled === 1 || String(j.status || "").toLowerCase() === "on";
+    var r = (j.rollup && typeof j.rollup === "object") ? j.rollup : {};
+    var live = on ? meshNum(r.live, j.live_nodes, j.live) : 0;
+    var locked = on ? meshNum(r.locked, j.locked_nodes, j.locked) : 0;
+    var isolated = on ? meshNum(r.isolated, j.isolated_nodes, j.isolated) : 0;
+    $("meshLiveCount").textContent = String(live);
+    $("qnmLive").textContent = String(live);
+    $("qnmLocked").textContent = String(locked);
+    $("qnmIsolated").textContent = String(isolated);
+    var line = $("meshLine");
+    if (on) line.textContent = "Suite mesh: on · live " + live + " · locked " + locked + " · isolated " + isolated + ". Not an anonymity network.";
+    else if (j.status === "unavailable" || (j.ok === false && j.error)) line.textContent = "Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network.";
+    else line.textContent = "Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.";
+    var products = j.products_present || j.products || [];
+    var names = Array.isArray(products) ? products.map(function (p) { return typeof p === "string" ? p : (p && (p.product || p.slug)) || ""; }).filter(Boolean) : [];
+    var nodes = Array.isArray(j.nodes) ? j.nodes : [];
+    var extra = names.length ? " · products " + names.join(", ") : (nodes.length ? " · " + nodes.length + " node labels" : "");
+    $("meshProducts").textContent = "Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate · Plain (not Lock)" + extra;
+  }
+  async function meshGet(path) {
+    var r = await fetch(path, { headers: { "user-agent": "Mozilla/5.0", accept: "application/json" } });
+    return r.json();
+  }
+  async function meshPost(path, payload) {
+    var r = await fetch(path, { method: "POST", headers: { "content-type": "application/json", "user-agent": "Mozilla/5.0" }, body: JSON.stringify(payload || {}) });
+    return r.json();
+  }
+  async function refreshMesh() {
+    try {
+      var status = await meshGet("/v1/mesh");
+      var merged = status;
+      var inner = unwrapMesh(status);
+      var on = inner.enabled === true;
+      if (on) {
+        try {
+          var nodes = await meshGet("/v1/mesh/nodes");
+          merged = Object.assign({}, inner, unwrapMesh(nodes));
+        } catch (e) { /* status is enough */ }
+      }
+      paintMesh(merged);
+      var nodeId = sessionStorage.getItem("staticclock_mesh_node");
+      if (on && nodeId) {
+        try { await meshPost("/v1/mesh/heartbeat", { node_id: nodeId }); } catch (e) { /* no auto-heal */ }
+      }
+    } catch (e) {
+      paintMesh({ ok: false, enabled: false, status: "unavailable", error: "mesh_unavailable" });
+    }
+  }
+  $("meshEnable").onclick = async function () {
+    var bearer = ($("meshBearer").value || "").trim();
+    paintMesh(await meshPost("/v1/mesh/enable", bearer ? { bearer: bearer } : {}));
+    refreshMesh();
+  };
+  $("meshDisable").onclick = async function () {
+    sessionStorage.removeItem("staticclock_mesh_node");
+    paintMesh(await meshPost("/v1/mesh/disable", {}));
+    refreshMesh();
+  };
+  $("meshJoin").onclick = async function () {
+    var j = await meshPost("/v1/mesh/join", { product: "staticclock", label: "StaticClock Worker" });
+    var inner = unwrapMesh(j);
+    var id = inner.node_id || inner.id || (inner.session && inner.session.node_id);
+    if (id) sessionStorage.setItem("staticclock_mesh_node", String(id));
+    paintMesh(j);
+    refreshMesh();
+  };
+  $("meshLeave").onclick = async function () {
+    var id = sessionStorage.getItem("staticclock_mesh_node");
+    if (id) await meshPost("/v1/mesh/leave", { node_id: id });
+    sessionStorage.removeItem("staticclock_mesh_node");
+    refreshMesh();
+  };
+  window.addEventListener("pagehide", function () {
+    var id = sessionStorage.getItem("staticclock_mesh_node");
+    if (!id || typeof navigator.sendBeacon !== "function") return;
+    try { navigator.sendBeacon("/v1/mesh/leave", new Blob([JSON.stringify({ node_id: id })], { type: "application/json" })); } catch (e) { /* leave expires in 5 minutes */ }
+  });
+  refreshMesh();
+  setInterval(refreshMesh, 30000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshMesh(); });
+})();

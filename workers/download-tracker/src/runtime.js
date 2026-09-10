@@ -1,8 +1,10 @@
 /**
  * StaticClock hosted runtime: append-only gear-click timeline + AZ-OS hook.
  * Companion advisory remains. /v1 never touches DOWNLOADS KV and never stores a chain.
+ * /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME (handled in index.js before this catch-all).
  * Author Aziel Eliab.
  */
+import { meshOpenApiPaths, meshPointer } from "./mesh.js";
 import INDEX from "./index-data.json";
 
 const PRODUCT = "staticclock";
@@ -11,7 +13,7 @@ const AUTHOR = "Aziel Eliab";
 const MOTTO = "Every action is a gear click. Time only locks forward.";
 const HOST = "https://staticclock-download-tracker.vibelock.workers.dev";
 const GENESIS_PREV_HASH = "0".repeat(64);
-const SKILL = "---\nname: StaticClock\ndescription: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.\n---\n\n# StaticClock\n\nEvery action is a gear click. Time only locks forward.\n\nAuthor: **Aziel Eliab**.\n\n**THIS IS:** an action-based immutable timeline. Each action is a click or second that locks forward. AZ-OS hook records principle-bound actions into the gear.\n\n**THIS IS NOT:** a rollback clock, a remote shell, or ChronoLock. ChronoLock is the related advisory-window product. TemporalLock is observation receipts. Hosted `/v1` does not increment downloads or views and does not store a chain.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://staticclock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n- `GET /v1/health` \u2014 liveness\n- `GET /v1/skill` \u2014 this file\n- `GET /v1/example` \u2014 sample click payload\n- `GET /v1/anchors` \u2014 Top-30 geographic anchors\n- `POST /v1/click` \u2014 append one click (send existing `clicks` if any)\n- `POST /v1/hook` \u2014 AZ-OS hook; records, does not exec\n- `POST /v1/verify` \u2014 recompute hashes\n- `POST /v1/timeslate` \u2014 tip timeslate (`cross_hash`, `evidence`, `bind`); TemporalLock lattice binds to it\n- `POST /v1/advisory` \u2014 companion advisory for a last-known geo\n\nThere is no rollback. `POST /v1/rollback` returns 400.\n\n## Use with AI assistants\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.\n\nImport the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Author Aziel Eliab only.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"opened the ledger\"}'\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/hook \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"invite accepted\",\"session\":\"azos-1\"}'\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash\nstaticclock ui\nstaticclock doctor\n```\n\nThen open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify.\n\nCounted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz\nProduct homepage (workspace + install): https://staticclock-download-tracker.vibelock.workers.dev/\nGitHub: https://github.com/AzielEliab/staticclock\n";
+const SKILL = "---\nname: StaticClock\ndescription: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Dual surface: Worker /v1 + catalog MCP. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab.\n---\n\n# StaticClock\n\nEvery action is a gear click. Time only locks forward.\n\nAuthor: **Aziel Eliab**.\n\n**THIS IS:** an action-based immutable timeline. Each action is a click or second that locks forward. AZ-OS hook records principle-bound actions into the gear.\n\n**THIS IS NOT:** a rollback clock, a remote shell, or ChronoLock. ChronoLock is the related advisory-window product. TemporalLock is observation receipts. Hosted `/v1` does not increment downloads or views and does not store a chain.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://staticclock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/skill`\n- Suite mesh: `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh` (PROXY; default OFF)\n\nOps (do **not** increment downloads or views):\n\n- `GET /v1/health` — liveness\n- `GET /v1/skill` — this file\n- `GET /v1/mesh` — PROXY suite mesh status. Default OFF. QNM live|locked|isolated. Never enables.\n- `GET /v1/mesh/nodes` — PROXY Live Nodes roster (5-minute presence).\n- `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` — PROXY. Bearer required to enable. No auto-heal. Anon-broadcast is not a publish path.\n- `GET /v1/example` — sample click payload\n- `GET /v1/anchors` — Top-30 geographic anchors\n- `POST /v1/click` — append one click (send existing `clicks` if any)\n- `POST /v1/hook` — AZ-OS hook; records, does not exec\n- `POST /v1/verify` — recompute hashes\n- `POST /v1/timeslate` — tip timeslate (`cross_hash`, `evidence`, `bind`); TemporalLock lattice binds to it\n- `POST /v1/advisory` — companion advisory for a last-known geo\n\nThere is no rollback. `POST /v1/rollback` returns 400.\n\n## Use with AI assistants\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.\n\nImport the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab only.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"opened the ledger\"}'\ncurl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/hook \\\n  -H 'content-type: application/json' \\\n  -d '{\"action\":\"invite accepted\",\"session\":\"azos-1\"}'\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://staticclock-download-tracker.vibelock.workers.dev/install.sh | bash\nstaticclock ui\nstaticclock doctor\n```\n\nThen open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify. Worker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF).\n\nCounted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz\nProduct homepage (workspace + install): https://staticclock-download-tracker.vibelock.workers.dev/\nGitHub: https://github.com/AzielEliab/staticclock\n";
 
 const OUTPUT_FIELDS = ["geo_location_chosen", "optimal_time", "optimal_date", "primary_language", "dialect_section"];
 const DEFAULT_ANCHOR = "United States";
@@ -58,8 +60,8 @@ for (const s of US_STATES) ALIASES[s] = "United States";
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, X-Aziel-Runtime-Token, User-Agent",
   };
 }
 
@@ -407,7 +409,7 @@ function openapiSpec() {
     info: {
       title: "StaticClock runtime",
       version: VERSION,
-      description: "Action-based immutable timeline. No rollbacks. AZ-OS hook. " + MOTTO,
+      description: "Action-based immutable timeline. No rollbacks. AZ-OS hook. " + MOTTO + " Suite mesh /v1/mesh/* PROXY to aziel-runtime (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Aziel Eliab only.",
     },
     servers: [{ url: HOST }],
     paths: {
@@ -459,6 +461,7 @@ function openapiSpec() {
           responses: { "200": { description: "timeslate", content: { "application/json": { schema: obj } } } },
         },
       },
+      ...meshOpenApiPaths(),
       "/v1/advisory": {
         post: {
           operationId: "advisory",
@@ -510,14 +513,16 @@ function aiHtml() {
   <p><code>${HOST}/openapi.json</code></p>
   <p>Grok can also point a custom tool at <code>POST ${HOST}/v1/click</code>, <code>POST ${HOST}/v1/hook</code>, and <code>POST ${HOST}/v1/verify</code>.</p>
   <h2>MCP catalog</h2>
-  <p>Cursor, Glama, Claude, and other MCP clients use the shared catalog at <code>https://aziel-runtime.vibelock.workers.dev/mcp</code>.</p>
-  <p><a href="/openapi.json">openapi.json</a> · <a href="/v1/health">health</a> · <a href="/">StaticClock</a></p>
+  <p>Cursor, Glama, Claude, and other MCP clients use the shared catalog at <code>https://aziel-runtime.vibelock.workers.dev/mcp</code> (catalog <code>mesh_*</code> + FragGate <code>slug=mesh</code>).</p>
+  <p>Suite mesh: <code>GET ${HOST}/v1/mesh</code> PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author: Aziel Eliab only.</p>
+  <p><a href="/openapi.json">openapi.json</a> · <a href="/v1/health">health</a> · <a href="/v1/mesh">/v1/mesh</a> · <a href="/">StaticClock</a></p>
 </body>
 </html>`;
 }
 
 export async function handleRuntimeApi(request, url) {
   const path = url.pathname;
+  if (path === "/v1/mesh" || path.startsWith("/v1/mesh/")) return null;
   const isApi = path === "/v1" || path.startsWith("/v1/") || path === "/openapi.json" || path === "/ai";
   if (!isApi) return null;
   if (path === "/v1/health" && request.method === "GET") {
@@ -530,6 +535,7 @@ export async function handleRuntimeApi(request, url) {
       identity: "action-based immutable timeline",
       rollbacks: false,
       azos_hook: true,
+      mesh: meshPointer(),
     });
   }
   if (path === "/v1/skill" && request.method === "GET") {
@@ -613,5 +619,5 @@ export async function handleRuntimeApi(request, url) {
     const advisory = await advise(geo, body.language, body.dialect);
     return json(advisory);
   }
-  return json({ error: "not found" }, 404);
+  return json({ error: "not found", hint: "GET /v1/health GET /v1/skill POST /v1/{click,hook,verify,timeslate,advisory} GET /v1/mesh" }, 404);
 }

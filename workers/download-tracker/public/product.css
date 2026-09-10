@@ -89,6 +89,44 @@ h1 {
   margin: 0 0 1.15rem;
   font-size: 0.92rem;
 }
+#meshStrip {
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  margin: 0 0 1.15rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+#meshStrip .live { color: var(--ink); }
+#meshStrip .live b { color: var(--gold); font-size: 1.35rem; margin-right: 0.35rem; }
+#meshStrip .rollup b { color: var(--gold); }
+#meshStrip button {
+  font: 700 0.78rem/1 ui-monospace, Menlo, Consolas, monospace;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 8px;
+  background: #101010;
+  color: var(--ink);
+  border: 1px solid var(--gold);
+  cursor: pointer;
+}
+#meshStrip button:hover { background: #241c0d; color: var(--gold); }
+#meshStrip input[type="text"] {
+  width: 10rem;
+  min-height: 2rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  background: #0e0e0e;
+  color: var(--ink);
+  font: inherit;
+}
+#meshProducts { flex-basis: 100%; margin: 0; }
 .card {
   border: 1px solid var(--line);
   border-radius: 12px;
