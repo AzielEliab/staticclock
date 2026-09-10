@@ -46,7 +46,7 @@ The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
 - Direct tarball: [staticclock-0.2.0.tar.gz](https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz)
 - One-click install: [https://staticclock-download-tracker.vibelock.workers.dev/install.sh](https://staticclock-download-tracker.vibelock.workers.dev/install.sh)
 - Skill: [https://staticclock-download-tracker.vibelock.workers.dev/v1/skill](https://staticclock-download-tracker.vibelock.workers.dev/v1/skill)
-- Suite mesh proxy: [https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh](https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh) — default OFF; QNM live / locked / isolated
+- Suite mesh proxy: [https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh](https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh) — default OFF; QNM live / locked / isolated; QNS-CD-1.0 photon QNS1 packet transfer cross-map (no public qnsd proxy)
 - OpenAPI: [https://staticclock-download-tracker.vibelock.workers.dev/openapi.json](https://staticclock-download-tracker.vibelock.workers.dev/openapi.json)
 - GitHub: [https://github.com/AzielEliab/staticclock](https://github.com/AzielEliab/staticclock)
 
@@ -224,7 +224,7 @@ https://staticclock-download-tracker.vibelock.workers.dev/openapi.json
 
 Setup notes: [https://staticclock-download-tracker.vibelock.workers.dev/ai](https://staticclock-download-tracker.vibelock.workers.dev/ai)
 
-MCP catalog (Cursor, Glama, Claude, and other MCP clients): `https://aziel-runtime.vibelock.workers.dev/mcp`. Suite mesh `/v1/mesh/*` PROXY via `AZIEL_RUNTIME` (default OFF; QNM-BUILD-1.0 live|locked|isolated; no Node Gate). Catalog MCP `mesh_*` + FragGate `slug=mesh`. StaticClock is Plain category (not Lock).
+MCP catalog (Cursor, Glama, Claude, and other MCP clients): `https://aziel-runtime.vibelock.workers.dev/mcp`. Suite mesh `/v1/mesh/*` PROXY via `AZIEL_RUNTIME` (default OFF; QNM-BUILD-1.0 live|locked|isolated; QNS-CD-1.0 photon QNS1 packet transfer cross-map; no Node Gate; no public qnsd proxy). Catalog MCP `mesh_*` + FragGate `slug=mesh`. Local qnsd is [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites + catalog field live in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime); pair custody is [AZInterface](https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. StaticClock is Plain category (not Lock).
 
 ```bash
 curl -sS -X POST https://staticclock-download-tracker.vibelock.workers.dev/v1/click \

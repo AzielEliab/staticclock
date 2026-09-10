@@ -1,6 +1,6 @@
 ---
 name: StaticClock
-description: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Dual surface: Worker /v1 + catalog MCP. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab.
+description: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Dual surface: Worker /v1 + catalog MCP. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in AzielEliab/qnm-node; runtime cites in AzielEliab/aziel-runtime; AZInterface pair custody). No Node Gate. No public qnsd proxy. No auto-heal. Not anonymity. Not a Softwares-tab product. StaticClock is Plain category (not Lock). Author Aziel Eliab.
 ---
 
 # StaticClock
@@ -27,8 +27,8 @@ Ops (do **not** increment downloads or views):
 
 - `GET /v1/health` — liveness
 - `GET /v1/skill` — this file
-- `GET /v1/mesh` — PROXY suite mesh status. Default OFF. QNM live|locked|isolated. Never enables.
-- `GET /v1/mesh/nodes` — PROXY Live Nodes roster (5-minute presence).
+- `GET /v1/mesh` — PROXY suite mesh status. Default OFF. QNM live|locked|isolated. QNS-CD-1.0 cross-map (photon QNS1 packet transfer). Never enables. No public qnsd proxy.
+- `GET /v1/mesh/nodes` — PROXY Live Nodes roster (5-minute presence) plus QNS-CD-1.0 cross-map.
 - `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` — PROXY. Bearer required to enable. No auto-heal. Anon-broadcast is not a publish path.
 - `GET /v1/example` — sample click payload
 - `GET /v1/anchors` — Top-30 geographic anchors
@@ -44,7 +44,7 @@ There is no rollback. `POST /v1/rollback` returns 400.
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
-Import the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab only.
+Import the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only ([qnm-node](https://github.com/AzielEliab/qnm-node) local qnsd, [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) cites + catalog field, [AZInterface](https://github.com/AzielEliab/azinterface) pair custody). No Node Gate. No public qnsd proxy. No auto-heal. Not anonymity. Not a Softwares-tab product. StaticClock is Plain category (not Lock). Author Aziel Eliab only.
 
 ## Example
 
@@ -68,7 +68,7 @@ staticclock ui
 staticclock doctor
 ```
 
-Then open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify. Worker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF).
+Then open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify. Worker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF; QNS-CD-1.0 cross-map in the payload).
 
 Counted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz
 Product homepage (workspace + install): https://staticclock-download-tracker.vibelock.workers.dev/

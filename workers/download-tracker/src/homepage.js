@@ -113,9 +113,9 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
 
   <div id="meshStrip" aria-label="Suite Live Nodes">
     <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
-    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.</div>
+    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
     <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
-    <div>No Node Gate · No auto-heal · Plain category (not Lock) · Aziel Eliab only</div>
+    <div>No Node Gate · No public qnsd proxy · QNS-CD-1.0 cite · No auto-heal · Plain category (not Lock) · Aziel Eliab only</div>
     <div>
       <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
       <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
@@ -123,7 +123,7 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
       <button id="meshJoin" type="button" title="Join as staticclock. Refused while mesh is OFF. No auto-join.">Join</button>
       <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
     </div>
-    <p id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate · Plain (not Lock)</p>
+    <p id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 cross-map · not AnonBroadcast · not AZMail ring · not a Node Gate · no public qnsd proxy · Plain (not Lock)</p>
   </div>
 
   <section class="card install" id="install">

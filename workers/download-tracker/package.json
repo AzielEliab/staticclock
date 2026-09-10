@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/homepage.test.mjs"
+    "test": "node --test test/homepage.test.mjs test/mesh-qns-cd.test.mjs"
   },
   "dependencies": {
     "wrangler": "^4.127.1"

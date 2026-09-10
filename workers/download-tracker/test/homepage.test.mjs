@@ -46,7 +46,9 @@ test("homepage keeps download, install, workspace, and honest banners", () => {
   assert.match(html, /id="meshStrip"/);
   assert.match(html, /Live Nodes/);
   assert.match(html, /QNM-BUILD-1.0/);
+  assert.match(html, /QNS-CD-1.0/);
   assert.match(html, /No Node Gate/);
+  assert.match(html, /No public qnsd proxy/);
   assert.match(html, /Plain category \(not Lock\)/);
   assert.match(html, /href="\/v1\/mesh"/);
   assert.doesNotMatch(html, /id="node-gate"/);
