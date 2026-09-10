@@ -30,7 +30,9 @@ Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
 6. **Keep the dependency list tiny.** Stdlib only in the core.
 7. **UI binds loopback only** (`127.0.0.1`). Do not listen on `0.0.0.0`.
 8. **Door vs local op.** `/v1/mesh/*` PROXY to aziel-runtime. Local ops are `/v1/{op}` only.
-   Suite mesh default OFF; QNM rollup live|locked|isolated; no Node Gate;
+   Suite mesh default OFF; QNM rollup live|locked|isolated; QNS-CD-1.0
+   photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only
+   (no public qnsd proxy; not a Softwares-tab product); no Node Gate;
    no auto-heal; not anonymity. StaticClock is Plain category (not Lock).
 9. New behavior needs a test that fails without the change.
 
@@ -48,7 +50,7 @@ Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
 - CLI: `staticclock/cli.py`
 - Local UI: `staticclock/ui.py`, `staticclock/web/`
 - Hosted runtime: `workers/download-tracker/src/runtime.js`
-- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
+- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime; QNS-CD-1.0 cross-map cite).
 
 ## License of contributions
 

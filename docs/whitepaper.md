@@ -369,9 +369,13 @@ Hosted Worker: `GET /v1/health`, `GET /v1/skill`, `GET /v1/example`,
 
 The Worker homepage shows a suite Live Nodes strip. `/v1/mesh/*` PROXY
 to aziel-runtime. Suite mesh default OFF. QNM rollup is
-live|locked|isolated counts only. No Node Gate. No auto-heal. Not an
-anonymity network. Anon-broadcast is not a publish path. StaticClock
-remains an action-based immutable timeline (Plain category, not Lock).
+live|locked|isolated counts only. QNS-CD-1.0 (photon QNS1 packet
+transfer) is a hub cite / Worker mesh cross-map only — local qnsd is
+qnm-node, runtime cites live in aziel-runtime, pair custody is
+AZInterface. No Node Gate. No public qnsd proxy. No auto-heal. Not an
+anonymity network. Anon-broadcast is not a publish path. Not a
+Softwares-tab product. StaticClock remains an action-based immutable
+timeline (Plain category, not Lock).
 
 Aziel Eliab
 2026
