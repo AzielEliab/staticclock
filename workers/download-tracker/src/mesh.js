@@ -429,8 +429,17 @@ async function originFetch(env, pathAndQuery, init, request) {
   const door_url = joinOriginUrl(runtimeOrigin(env), path);
   const bind = runtimeService(env);
   if (bind) {
-    const res = await bind.fetch(new Request(SERVICE_BINDING_ORIGIN + path, next));
-    return { res, via: "service-binding", door_url };
+    try {
+      const res = await bind.fetch(new Request(SERVICE_BINDING_ORIGIN + path, next));
+      const ct = (res.headers.get("Content-Type") || "").toLowerCase();
+      const looksJson = ct.includes("json");
+      if (res.ok || looksJson || res.status < 500) {
+        return { res, via: "service-binding", door_url };
+      }
+      // Local miniflare stub / missing sibling Worker — HTTPS fallback.
+    } catch {
+      /* fall through to HTTPS */
+    }
   }
 
   try {
