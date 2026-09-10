@@ -29,7 +29,10 @@ Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
 5. **No user identification.** Last-known geo is a string, not a profile.
 6. **Keep the dependency list tiny.** Stdlib only in the core.
 7. **UI binds loopback only** (`127.0.0.1`). Do not listen on `0.0.0.0`.
-8. New behavior needs a test that fails without the change.
+8. **Door vs local op.** `/v1/mesh/*` PROXY to aziel-runtime. Local ops are `/v1/{op}` only.
+   Suite mesh default OFF; QNM rollup live|locked|isolated; no Node Gate;
+   no auto-heal; not anonymity. StaticClock is Plain category (not Lock).
+9. New behavior needs a test that fails without the change.
 
 ## Where to change things
 
@@ -45,6 +48,7 @@ Python 3.10+. Core is stdlib only (`zoneinfo`, `secrets`, `hashlib`,
 - CLI: `staticclock/cli.py`
 - Local UI: `staticclock/ui.py`, `staticclock/web/`
 - Hosted runtime: `workers/download-tracker/src/runtime.js`
+- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
 
 ## License of contributions
 

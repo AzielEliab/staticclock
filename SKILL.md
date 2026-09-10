@@ -1,6 +1,6 @@
 ---
 name: StaticClock
-description: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.
+description: Use when recording an action into an immutable gear-click timeline, or when an AZ-OS session should lock an action forward. No rollbacks. Dual surface: Worker /v1 + catalog MCP. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab.
 ---
 
 # StaticClock
@@ -21,11 +21,15 @@ Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
 - Live skill (this markdown): `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/skill`
+- Suite mesh: `GET https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh` (PROXY; default OFF)
 
 Ops (do **not** increment downloads or views):
 
 - `GET /v1/health` — liveness
 - `GET /v1/skill` — this file
+- `GET /v1/mesh` — PROXY suite mesh status. Default OFF. QNM live|locked|isolated. Never enables.
+- `GET /v1/mesh/nodes` — PROXY Live Nodes roster (5-minute presence).
+- `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` — PROXY. Bearer required to enable. No auto-heal. Anon-broadcast is not a publish path.
 - `GET /v1/example` — sample click payload
 - `GET /v1/anchors` — Top-30 geographic anchors
 - `POST /v1/click` — append one click (send existing `clicks` if any)
@@ -40,7 +44,7 @@ There is no rollback. `POST /v1/rollback` returns 400.
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
-Import the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Author Aziel Eliab only.
+Import the Worker or catalog OpenAPI as a custom tool (ChatGPT GPT Actions, Grok, Venice HTTP tools, Claude, Copilot, Gemini, and other OpenAPI clients). Cursor and Glama: MCP catalog at `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. StaticClock is Plain category (not Lock). Author Aziel Eliab only.
 
 ## Example
 
@@ -53,6 +57,7 @@ curl -s -A 'Mozilla/5.0' -X POST https://staticclock-download-tracker.vibelock.w
   -H 'content-type: application/json' \
   -d '{"action":"invite accepted","session":"azos-1"}'
 curl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/skill
+curl -s -A 'Mozilla/5.0' https://staticclock-download-tracker.vibelock.workers.dev/v1/mesh
 ```
 
 ## Local (after one-click install)
@@ -63,7 +68,7 @@ staticclock ui
 staticclock doctor
 ```
 
-Then open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify.
+Then open http://127.0.0.1:8765 (loopback only). Click the gear. Optional AZ-OS hook, Import JSON, Export JSON, Verify. Worker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF).
 
 Counted download (gzip HTTP 200, no 302): https://staticclock-download-tracker.vibelock.workers.dev/download?asset=staticclock-0.2.0.tar.gz
 Product homepage (workspace + install): https://staticclock-download-tracker.vibelock.workers.dev/

@@ -111,6 +111,21 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
 
   <p class="banner" role="note">THIS IS: an action-based immutable timeline — every action is a gear click or second that locks forward. AZ-OS hook records; it does not exec. Companion advisory names five fields for a last-known geo. THIS IS NOT: a rollback clock, a remote shell, a scheduler, or ChronoLock. Related: ChronoLock (advisory window). Distinct from TemporalLock (observation receipts). Hosted <code>/v1</code> is stateless and does not store a chain. Author Aziel Eliab only.</p>
 
+  <div id="meshStrip" aria-label="Suite Live Nodes">
+    <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
+    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.</div>
+    <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
+    <div>No Node Gate · No auto-heal · Plain category (not Lock) · Aziel Eliab only</div>
+    <div>
+      <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
+      <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
+      <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
+      <button id="meshJoin" type="button" title="Join as staticclock. Refused while mesh is OFF. No auto-join.">Join</button>
+      <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
+    </div>
+    <p id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate · Plain (not Lock)</p>
+  </div>
+
   <section class="card install" id="install">
     <div class="nums">
       <p class="count">${v}<span>Views</span></p>
@@ -126,7 +141,7 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
     <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${assetName} — ${n} counted.</p>
     <p class="iso">Isolated counter: Worker <code>staticclock-download-tracker</code>, project <code>staticclock</code>, KV <code>STATICCLOCK_DOWNLOADS</code>. Not mixed with any other product. <code>/v1</code> does not increment downloads or views.</p>
     <p class="meta">GitHub: stars ${escapeHtml(gh.stars || 0)} · forks ${escapeHtml(gh.forks || 0)} · watchers ${escapeHtml(gh.watchers || 0)} · release assets ${escapeHtml(gh.release_download_count || 0)}</p>
-    <p class="meta"><a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_REPO}/releases/latest">releases</a> · <a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${CATALOG}">Catalog</a></p>
+    <p class="meta"><a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_REPO}/releases/latest">releases</a> · <a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/mesh">/v1/mesh</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${CATALOG}">Catalog</a></p>
     <h2>Per repo / branch / fork</h2>
     <ul class="breakdown">${rows}</ul>
   </section>

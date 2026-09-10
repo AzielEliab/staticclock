@@ -1,3 +1,4 @@
+import { handleMeshApi } from "./mesh.js";
 import { handleRuntimeApi } from "./runtime.js";
 import { CITE, renderHomepage } from "./homepage.js";
 
@@ -9,6 +10,7 @@ import { CITE, renderHomepage } from "./homepage.js";
  *      (does not 302 to GitHub)
  * GET  /stats   JSON totals + per-repo + per-branch breakdown
  * POST /event   forks report a download {owner,repo,branch,fork,asset}
+ * /v1, /v1/mesh/* do not increment. Suite mesh PROXY via AZIEL_RUNTIME.
  *
  * KV binding DOWNLOADS. Keys: project|owner|repo|branch|fork
  * CORS *. No secrets in this tree.
@@ -29,8 +31,8 @@ const GITHUB_REPO = "https://github.com/AzielEliab/staticclock";
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, X-Aziel-Runtime-Token, User-Agent",
   };
 }
 
@@ -326,6 +328,9 @@ export default {
     }
 
 
+    const mesh = await handleMeshApi(request, url, env);
+    if (mesh) return mesh;
+
     const runtime = await handleRuntimeApi(request, url);
     if (runtime) return runtime;
 
@@ -394,7 +399,7 @@ export default {
       });
     }
     if ((url.pathname === "/sitemap.xml" || url.pathname === "/sitemap.xml/") && request.method === "GET") {
-      const locs = [HOST + "/", HOST + "/download", HOST + "/install.sh", HOST + "/v1/skill", HOST + "/openapi.json", GITHUB_REPO];
+      const locs = [HOST + "/", HOST + "/download", HOST + "/install.sh", HOST + "/v1/skill", HOST + "/v1/mesh", HOST + "/openapi.json", GITHUB_REPO];
       const xml =
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         locs.map((u) => "  <url><loc>" + u + "</loc></url>").join("\n") +
