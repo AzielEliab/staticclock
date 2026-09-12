@@ -6,7 +6,7 @@ Does **not** 302 to GitHub on `/download`. Serves gzip via `ASSETS.fetch`,
 `Cache-Control: private, no-store`.
 
 GET `/` is the **product homepage** (title `StaticClock — Aziel Eliab`):
-counted download, one-click install, everblooming sigil, and an interactive
+counted download, one-click install, rose-star brand mark, and an interactive
 workspace for `/v1` click / hook / verify / timeslate / advisory. Increments
 a **page-view** counter (separate from downloads).
 GET `/download` increments **downloads**.

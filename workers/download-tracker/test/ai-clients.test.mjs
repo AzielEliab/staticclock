@@ -53,6 +53,16 @@ test("SKILL.md lists the full AI assistant set", () => {
   assertFullList(md, "SKILL.md");
 });
 
+test("AI page rose-star brand mark has empty alt and no everblooming mark copy", () => {
+  assert.match(
+    runtimeSrc,
+    /<div class="brandrow"><img class="brandmark" src="\/sigil.png" width="40" height="40" alt="" decoding="async"><\/div>/,
+  );
+  assert.doesNotMatch(runtimeSrc, /everblooming/i);
+  assert.doesNotMatch(runtimeSrc, /alt="Everblooming/);
+  assert.doesNotMatch(runtimeSrc, /Everblooming sigil ·/);
+});
+
 test("Worker skill + /ai copy lists the full AI assistant set", () => {
   assert.match(runtimeSrc, /<title>StaticClock — use with AI assistants<\/title>/);
   assert.match(runtimeSrc, /## Use with AI assistants/);
