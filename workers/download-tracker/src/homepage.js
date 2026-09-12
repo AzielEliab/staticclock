@@ -97,9 +97,9 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
 <body>
   <header class="top">
     <div class="brandrow">
-      <img class="brandmark" src="/sigil.png" width="40" height="40" alt="Everblooming sigil — Aziel Eliab" decoding="async">
+      <img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async">
       <div>
-        <p class="stamp">Everblooming sigil · Aziel Eliab</p>
+        <p class="stamp">Aziel Eliab</p>
         <p class="tag">v0.2.0 · hosted workspace · AZ-OS hook · Apache-2.0</p>
       </div>
       <p class="health" id="health-pill" aria-live="polite">checking API…</p>
