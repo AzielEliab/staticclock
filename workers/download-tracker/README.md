@@ -24,3 +24,15 @@ Host: https://staticclock-download-tracker.vibelock.workers.dev
 Product identity: action-based immutable timeline. No rollbacks. AZ-OS hook.
 `POST /v1/click`, `POST /v1/hook`, `POST /v1/verify`. Hosted `/v1` is stateless
 and does not store a chain. Author Aziel Eliab only. Apache-2.0. Forks welcome.
+
+## Human / bot schema (`/stats` and `/count`)
+
+Additive dual-count (Whitestone canary). Classification lives in `src/classify.js`
+and response shaping in `src/stats-shape.js`.
+
+Invariant: `views === views_human + views_bot` and
+`downloads === downloads_human + downloads_bot`.
+
+Legacy strategy (b): existing KV totals are never reset. Pre-split remainder
+is shown as bot on read (`views_bot = views - views_human`). Author: Aziel Eliab only.
+
