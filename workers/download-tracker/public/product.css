@@ -100,7 +100,8 @@ button.btn.install, button.btn.gold, .ops button, .ops .file {
   padding: 0.8rem 1.05rem; font-weight: 650; min-height: 3.15rem;
 }
 button.btn.install {
-  background: transparent; color: var(--ink); border: 1px solid var(--line);
+  width: auto; align-self: flex-start; min-height: 44px; padding: 0.55rem 0.95rem;
+  font-size: 0.95rem; background: transparent; color: var(--ink); border: 1px solid var(--line);
 }
 button.btn.install.copied { background: var(--ok); color: var(--on-ok); border-color: transparent; }
 button.btn.gold { background: var(--gold); color: var(--on-gold); border: 0; }
@@ -227,9 +228,6 @@ footer p { margin: 0.35rem 0; }
 footer a { color: var(--ink); }
 @media (min-width: 560px) {
   .health { margin-left: auto; }
-  .hero-actions { flex-direction: row; align-items: stretch; }
-  a.btn.primary { width: auto; min-width: 16rem; flex: 1.4; }
-  button.btn.install { width: auto; flex: 1; }
   .inline { grid-template-columns: minmax(0, 1fr) auto; }
   .inline button.btn { width: auto; }
   dl.fields { grid-template-columns: 12rem minmax(0, 1fr); }
