@@ -63,6 +63,18 @@ def test_list_timezones_has_iana_and_local_times() -> None:
         assert row["local_date"]
 
 
+def test_ui_port_in_use_is_plain() -> None:
+    import pytest
+
+    httpd = make_server("127.0.0.1", 0)
+    port = httpd.server_address[1]
+    try:
+        with pytest.raises(ValueError, match="already in use"):
+            make_server("127.0.0.1", port)
+    finally:
+        httpd.server_close()
+
+
 def test_ui_rejects_non_loopback() -> None:
     import pytest
 
@@ -88,6 +100,21 @@ def test_ui_handler_advise_five_fields() -> None:
             html = resp.read().decode("utf-8")
         assert "last-known geo" in html.lower() or "Last-known geo" in html
         assert "dialect" in html.lower()
+        assert "Record action" in html
+        assert "<details" in html and "Advanced" in html
+        assert "prefers-color-scheme" not in html
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/style.css", timeout=3) as resp:
+            css = resp.read().decode("utf-8")
+        assert "prefers-color-scheme" in css
+        assert ":focus-visible" in css
+        assert "#c9a227" in css.lower()
+        req_json = urllib.request.Request(
+            f"http://127.0.0.1:{port}/",
+            headers={"Accept": "application/json"},
+        )
+        with urllib.request.urlopen(req_json, timeout=3) as resp:
+            home = json.loads(resp.read().decode("utf-8"))
+        assert "clicks" in home and "length" in home and "verify" in home
         req = urllib.request.Request(
             f"http://127.0.0.1:{port}/api/advise",
             data=json.dumps({"geo": "United States"}).encode("utf-8"),
@@ -100,6 +127,29 @@ def test_ui_handler_advise_five_fields() -> None:
     finally:
         httpd.shutdown()
         httpd.server_close()
+
+
+def test_bare_command_welcomes(capsys) -> None:
+    assert main([]) == 0
+    out = capsys.readouterr().out
+    assert "staticclock ui" in out
+    assert "staticclock doctor" in out
+    assert "arguments are required" not in out
+    assert "Aziel Eliab" in out
+
+
+def test_unknown_command_has_next_step(capsys) -> None:
+    assert main(["bogus"]) == 2
+    err = capsys.readouterr().err
+    assert 'Unknown command "bogus"' in err
+    assert "staticclock --help" in err
+
+
+def test_click_missing_action_has_next_step(capsys) -> None:
+    assert main(["click"]) == 2
+    err = capsys.readouterr().err
+    assert "action" in err.lower()
+    assert 'staticclock click --action "opened the ledger"' in err
 
 
 def test_help_lists_ui_and_version() -> None:

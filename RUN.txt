@@ -1,0 +1,9 @@
+StaticClock — Aziel Eliab
+
+1. python -m venv .venv && source .venv/bin/activate && pip install -e .
+2. staticclock ui
+3. Open http://127.0.0.1:8765/ and press Record action.
+
+Help:    staticclock --help
+Check:   staticclock doctor
+Machines: add --json on a command.

@@ -162,7 +162,9 @@ class StaticClockApp extends StatelessWidget {
     return MaterialApp(
       title: 'StaticClock',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       home: const AdvisePage(),
     );
   }
@@ -183,10 +185,11 @@ class _Tick {
 }
 
 class _AdvisePageState extends State<AdvisePage> {
-  final _geo = TextEditingController(text: 'Indiana');
+  final _geo = TextEditingController();
   final _action = TextEditingController();
   Advisory? _adv;
   final List<_Tick> _ticks = [];
+  String? _error;
 
   @override
   void dispose() {
@@ -197,14 +200,22 @@ class _AdvisePageState extends State<AdvisePage> {
 
   void _click([String? text, String source = 'local']) {
     final action = (text ?? _action.text).trim();
-    if (action.isEmpty) return;
+    if (action.isEmpty) {
+      setState(() => _error = 'Type an action first. Example: opened the ledger');
+      return;
+    }
     setState(() {
+      _error = null;
       _ticks.add(_Tick(_ticks.length + 1, action, source));
       if (text == null) _action.clear();
     });
   }
 
   void _advise() {
+    if (_geo.text.trim().isEmpty) {
+      setState(() => _error = 'Enter a place first. Example: Indiana');
+      return;
+    }
     final nonce = List<int>.generate(16, (_) => Random.secure().nextInt(256));
     final resolved = resolve(_geo.text);
     final chosenName = shake(resolved.basket, nonce, utf8.encode('geo'));
@@ -236,30 +247,32 @@ class _AdvisePageState extends State<AdvisePage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Every action is a gear click. Time only locks forward.',
-            style: TextStyle(color: kGold, fontStyle: FontStyle.italic),
-          ),
+          Text('Record what happened, in order.', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
-          const Text(
-            'Action-based immutable timeline. No rollbacks. AZ-OS hook. '
-            'Author Aziel Eliab. Companion advisory still available.',
-          ),
+          const Text('Each action is a gear click that locks forward while this app is open.'),
           const SizedBox(height: 16),
           TextField(
             controller: _action,
-            decoration: const InputDecoration(labelText: 'Action (one click, no rewind)'),
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(labelText: 'Action'),
+            onSubmitted: (_) => _click(),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              FilledButton(onPressed: () => _click(), child: const Text('Click the gear')),
-              const SizedBox(width: 8),
-              OutlinedButton(onPressed: () => _click(_action.text, 'azos'), child: const Text('AZ-OS hook')),
-            ],
-          ),
-          if (_ticks.isNotEmpty) ...[
+          FilledButton(onPressed: () => _click(), child: const Text('Record action')),
+          if (_error != null) ...[
+            const SizedBox(height: 12),
+            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ],
+          if (_ticks.isEmpty) ...[
             const SizedBox(height: 16),
+            Text(
+              'No actions yet. Type one above and record it.',
+              style: TextStyle(color: Theme.of(context).hintColor),
+            ),
+          ] else ...[
+            const SizedBox(height: 16),
+            Text('${_ticks.length} ${_ticks.length == 1 ? 'action' : 'actions'}'),
+            const SizedBox(height: 8),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -270,37 +283,71 @@ class _AdvisePageState extends State<AdvisePage> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          TextField(
-            controller: _geo,
-            decoration: const InputDecoration(labelText: 'Last-known geo (or Top-30 country)'),
-          ),
-          const SizedBox(height: 12),
-          Row(
+          const SizedBox(height: 8),
+          ExpansionTile(
+            title: const Text('Advanced'),
             children: [
-              FilledButton(onPressed: _advise, child: const Text('Advise')),
-              const SizedBox(width: 8),
-              OutlinedButton(onPressed: _forget, child: const Text('Forget')),
-            ],
-          ),
-          if (_adv != null) ...[
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: SelectableText(
-                  [
-                    'geo_location_chosen: ${_adv!.geo}',
-                    'optimal_time: ${_adv!.time}',
-                    'optimal_date: ${_adv!.date}',
-                    'primary_language: ${_adv!.language}',
-                    'dialect_section: ${_adv!.dialect}',
-                  ].join('\n'),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 14, height: 1.5),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('AZ-OS hook', style: Theme.of(context).textTheme.titleMedium),
+              ),
+              const SizedBox(height: 8),
+              const Text('Records the action above into this list.'),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => _click(_action.text, 'azos'),
+                child: const Text('Record with AZ-OS'),
+              ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Companion advisory', style: Theme.of(context).textTheme.titleMedium),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _geo,
+                decoration: const InputDecoration(
+                  labelText: 'Last-known geo',
+                  hintText: 'Indiana',
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              OutlinedButton(onPressed: _advise, child: const Text('Advise')),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: _forget, child: const Text('Clear place')),
+              if (_adv != null) ...[
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: SelectableText(
+                      [
+                        'geo_location_chosen: ${_adv!.geo}',
+                        'optimal_time: ${_adv!.time}',
+                        'optimal_date: ${_adv!.date}',
+                        'primary_language: ${_adv!.language}',
+                        'dialect_section: ${_adv!.dialect}',
+                      ].join('\n'),
+                      style: const TextStyle(fontFamily: 'monospace', fontSize: 14, height: 1.5),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('About'),
+            children: const [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Author Aziel Eliab. This phone list grows only while the app is open. '
+                  'The desktop timeline is staticclock ui on this computer.',
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

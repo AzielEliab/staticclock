@@ -1,23 +1,21 @@
 """Command-line interface for StaticClock.
 
-    staticclock version
-    staticclock click --action "session started"
-    staticclock hook --action "invite accepted"
-    staticclock timeline
-    staticclock verify
-    staticclock advise --geo "United States"
-    staticclock anchors
-    staticclock zones
+    staticclock
     staticclock ui
+    staticclock click --action "session started"
+    staticclock timeline --timeline ticks.jsonl
+    staticclock verify --timeline ticks.jsonl
+    staticclock doctor
 
-Action-based immutable timeline. No rollbacks. AZ-OS hook.
-Author: Aziel Eliab. Forks always allowed.
+People get short text. Add --json when a program needs the same result as data.
+Author: Aziel Eliab.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -27,61 +25,222 @@ from staticclock.anchors import TOP_30
 from staticclock.azos import AzosHook
 from staticclock.engine import OUTPUT_FIELDS, StaticClock
 from staticclock.timeline import Timeline
-from staticclock.zones import list_timezones
+
+AUTHOR = "Aziel Eliab"
+
+START_COMMANDS: tuple[tuple[str, str], ...] = (
+    ("ui", "Open the local timeline at http://127.0.0.1:8765"),
+    ("click", "Record one action"),
+    ("timeline", "Show recorded actions"),
+    ("verify", "Check that the chain still matches"),
+    ("doctor", "Check this install"),
+)
+
+ADVANCED_COMMANDS: tuple[tuple[str, str], ...] = (
+    ("hook", "Record an AZ-OS action"),
+    ("genesis", "Start a new timeline file"),
+    ("timeslate", "Show the tip timeslate"),
+    ("advise", "Companion place, time, language, and dialect"),
+    ("anchors", "List the 30 place names"),
+    ("zones", "Local times for those places"),
+    ("import", "Import a JSON document"),
+    ("export", "Export a JSON document"),
+    ("serve", "Same as ui"),
+    ("version", "Print the version"),
+)
 
 
-def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="staticclock",
-        description=(
-            "StaticClock — action-based immutable timeline "
-            "(Aziel Eliab, 2026). Every action is a gear click. "
-            "Time only locks forward. AZ-OS hook. "
-            "Local UI: `staticclock ui` at http://127.0.0.1:8765."
-        ),
+def _root_help() -> str:
+    lines = [
+        "StaticClock records actions in order. Each action locks forward as one click.",
+        "",
+        "usage:",
+        "  staticclock",
+        "  staticclock ui",
+        '  staticclock click --action "opened the ledger"',
+        "  staticclock --help",
+        "",
+        "Start",
+    ]
+    for name, blurb in START_COMMANDS:
+        lines.append(f"  {name:<12}{blurb}")
+    lines.append("")
+    lines.append("Advanced")
+    for name, blurb in ADVANCED_COMMANDS:
+        lines.append(f"  {name:<12}{blurb}")
+    lines.extend(
+        [
+            "",
+            "Add --json on a command when a program needs data.",
+            f"Author: {AUTHOR}",
+            "",
+        ]
     )
-    sub = parser.add_subparsers(dest="cmd", required=True)
+    return "\n".join(lines)
 
-    sub.add_parser("version", help="Print package version.")
-    sub.add_parser("anchors", help="List the Top-30 geographic anchors.")
 
-    p_click = sub.add_parser("click", help="Append one immutable gear click.")
-    p_click.add_argument("--action", required=True, help="Action that becomes the next second.")
+def _required_hint(command: str | None, message: str) -> str:
+    hints = {
+        "click": 'Click needs an action. Try: staticclock click --action "opened the ledger"',
+        "hook": 'The AZ-OS hook needs an action. Try: staticclock hook --action "invite accepted"',
+        "genesis": (
+            "Genesis needs a new file and an action. "
+            'Try: staticclock genesis --timeline ticks.jsonl --action "first click"'
+        ),
+        "verify": "Verify needs a timeline file. Try: staticclock verify --timeline ticks.jsonl",
+        "timeslate": "Timeslate needs a timeline file. Try: staticclock timeslate --timeline ticks.jsonl",
+        "advise": 'Advise needs a place. Try: staticclock advise --geo "United States"',
+        "import": "Import needs a JSON file. Try: staticclock import notes.json",
+        "export": "Export needs a destination file. Try: staticclock export notes.json",
+    }
+    if command in hints:
+        return hints[command]
+    if command:
+        return f"{message}. Try: staticclock {command} --help"
+    return f"{message}. Try: staticclock --help"
+
+
+def _humanize_arg_error(command: str | None, message: str) -> str:
+    choice = re.search(r"invalid choice: '([^']*)'", message)
+    if choice:
+        name = choice.group(1) or "(empty)"
+        return f'Unknown command "{name}". Try: staticclock ui   or   staticclock --help'
+    if "unrecognized arguments" in message:
+        extra = message.split(":", 1)[-1].strip()
+        hint = f"staticclock {command} --help" if command else "staticclock --help"
+        return f"Unknown option {extra}. Try: {hint}"
+    if "required" in message:
+        return _required_hint(command, message)
+    if command:
+        return f"{message}. Try: staticclock {command} --help"
+    return f"{message}. Try: staticclock --help"
+
+
+class FriendlyParser(argparse.ArgumentParser):
+    """Human errors, and a short root help page."""
+
+    def format_help(self) -> str:
+        if getattr(self, "_root_help", False):
+            return _root_help()
+        return super().format_help()
+
+    def error(self, message: str) -> None:
+        text = _humanize_arg_error(getattr(self, "_sc_name", None), message)
+        self.exit(2, text + "\n")
+
+
+def _fail(text: str) -> int:
+    print(text, file=sys.stderr)
+    return 2
+
+
+def _build_parser() -> FriendlyParser:
+    parser = FriendlyParser(
+        prog="staticclock",
+        description="StaticClock records actions in order.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser._root_help = True  # noqa: SLF001
+    parser._sc_name = None  # noqa: SLF001
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help=argparse.SUPPRESS,
+    )
+    sub = parser.add_subparsers(dest="cmd", required=False, metavar="<command>")
+
+    def add(name: str, *, help: str, description: str, epilog: str) -> argparse.ArgumentParser:
+        command = sub.add_parser(
+            name,
+            help=help,
+            description=description,
+            epilog=epilog,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+        command._sc_name = name  # noqa: SLF001
+        return command
+
+    add(
+        "version",
+        help="Print the version.",
+        description="Print the StaticClock version.",
+        epilog="Example: staticclock version",
+    ).add_argument("--json", action="store_true", dest="as_json", help="Print version as JSON.")
+
+    add(
+        "anchors",
+        help="List the 30 place names.",
+        description="List the Top-30 geographic anchors, one name per line.",
+        epilog="Example: staticclock anchors",
+    ).add_argument("--json", action="store_true", dest="as_json", help="Print the names as JSON.")
+
+    p_click = add(
+        "click",
+        help="Record one action.",
+        description="Record one action. It locks forward as the next click.",
+        epilog='Example: staticclock click --action "opened the ledger"',
+    )
+    p_click.add_argument("--action", required=True, help="Action that becomes the next click.")
     p_click.add_argument("--source", default="local", help="Click source (default local).")
     p_click.add_argument("--timeline", help="Optional JSONL path. Created on first click.")
     p_click.add_argument("--json", action="store_true", dest="as_json", help="Print the click as JSON.")
 
-    p_hook = sub.add_parser("hook", help="AZ-OS hook: record a principle-bound action. Does not exec.")
+    p_hook = add(
+        "hook",
+        help="Record an AZ-OS action.",
+        description="Record a principle-bound action into the timeline.",
+        epilog='Example: staticclock hook --action "invite accepted" --session azos-1',
+    )
     p_hook.add_argument("--action", required=True, help="AZ-OS action to lock into the gear.")
     p_hook.add_argument("--session", default="", help="Optional AZ-OS session label.")
     p_hook.add_argument("--principle", default="", help="Optional principle label.")
     p_hook.add_argument("--timeline", help="Optional JSONL path.")
     p_hook.add_argument("--json", action="store_true", dest="as_json", help="Print the click as JSON.")
 
-    p_tl = sub.add_parser("timeline", help="Show clicks on a JSONL timeline (or empty gear).")
+    p_tl = add(
+        "timeline",
+        help="Show recorded actions.",
+        description="Show clicks on a JSONL timeline, or an empty in-memory gear.",
+        epilog="Example: staticclock timeline --timeline ticks.jsonl",
+    )
     p_tl.add_argument("--timeline", help="JSONL path.")
     p_tl.add_argument("--json", action="store_true", dest="as_json", help="Print clicks as JSON.")
 
-    p_ver = sub.add_parser("verify", help="Recompute hashes. Anyone can verify. No rollback.")
+    p_ver = add(
+        "verify",
+        help="Check that the chain still matches.",
+        description="Recompute hashes. Anyone can verify.",
+        epilog="Example: staticclock verify --timeline ticks.jsonl",
+    )
     p_ver.add_argument("--timeline", required=True, help="JSONL path.")
     p_ver.add_argument("--json", action="store_true", dest="as_json", help="Print verify result as JSON.")
 
-    p_ts = sub.add_parser(
+    p_ts = add(
         "timeslate",
-        help="Emit the tip timeslate TemporalLock binds into its lattice.",
+        help="Show the tip timeslate.",
+        description="Emit the tip timeslate TemporalLock binds into its lattice.",
+        epilog="Example: staticclock timeslate --timeline ticks.jsonl",
     )
     p_ts.add_argument("--timeline", required=True, help="JSONL path.")
     p_ts.add_argument("--json", action="store_true", dest="as_json", help="Print timeslate as JSON.")
 
-    p_gen = sub.add_parser("genesis", help="First click of a new JSONL timeline. File must be absent or empty.")
+    p_gen = add(
+        "genesis",
+        help="Start a new timeline file.",
+        description="First click of a new JSONL timeline. The file must be absent or empty.",
+        epilog='Example: staticclock genesis --timeline ticks.jsonl --action "first click"',
+    )
     p_gen.add_argument("--timeline", required=True, help="New JSONL path.")
     p_gen.add_argument("--action", required=True, help="Genesis action.")
     p_gen.add_argument("--source", default="local")
     p_gen.add_argument("--json", action="store_true", dest="as_json")
 
-    p_adv = sub.add_parser(
+    p_adv = add(
         "advise",
-        help="Companion advisory for a last-known geo (also clicks the gear).",
+        help="Companion place, time, language, and dialect.",
+        description="Companion advisory for a last-known place. This also records a click.",
+        epilog='Example: staticclock advise --geo "United States"',
     )
     p_adv.add_argument(
         "--geo",
@@ -95,35 +254,81 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Print the five companion fields as JSON.",
     )
 
-    sub.add_parser(
+    p_zones = add(
         "zones",
-        help="Read-only IANA zones with computed current local times.",
+        help="Local times for the 30 places.",
+        description="Read-only IANA zones with computed current local times.",
+        epilog="Example: staticclock zones",
     )
+    p_zones.add_argument("--json", action="store_true", dest="as_json", help="Print zones as JSON.")
 
-    p_ui = sub.add_parser(
-        "ui",
-        help="Serve the local timeline UI on 127.0.0.1.",
+    for name, blurb in (("ui", "Open the local timeline on 127.0.0.1."), ("serve", "Same as ui.")):
+        command = add(
+            name,
+            help=blurb,
+            description="Serve the local timeline on this computer only.",
+            epilog="Example: staticclock ui",
+        )
+        command.add_argument("--host", default="127.0.0.1", help="Loopback host (default 127.0.0.1).")
+        command.add_argument("--port", type=int, default=8765, help="Port (default 8765).")
+
+    p_doc = add(
+        "doctor",
+        help="Check this install.",
+        description="Self-check. No network, no telemetry.",
+        epilog="Example: staticclock doctor",
     )
-    p_ui.add_argument("--host", default="127.0.0.1", help="Loopback host (default 127.0.0.1).")
-    p_ui.add_argument("--port", type=int, default=8765, help="Port (default 8765).")
-
-    p_serve = sub.add_parser(
-        "serve",
-        help="Alias for ui. Bind 127.0.0.1 only.",
-    )
-    p_serve.add_argument("--host", default="127.0.0.1", help="Loopback host (default 127.0.0.1).")
-    p_serve.add_argument("--port", type=int, default=8765, help="Port (default 8765).")
-
-    p_doc = sub.add_parser("doctor", help="Self-check. No network, no telemetry.")
     p_doc.add_argument("--json", action="store_true", dest="as_json", help="Print doctor results as JSON.")
 
-    p_imp = sub.add_parser("import", help="Import a JSON document.")
-    p_imp.add_argument("path")
+    p_imp = add(
+        "import",
+        help="Import a JSON document.",
+        description="Import a JSON document into the local state file.",
+        epilog="Example: staticclock import notes.json",
+    )
+    p_imp.add_argument("path", help="JSON file to import.")
+    p_imp.add_argument("--json", action="store_true", dest="as_json", help="Print the import record as JSON.")
 
-    p_exp = sub.add_parser("export", help="Export a JSON document.")
-    p_exp.add_argument("path")
+    p_exp = add(
+        "export",
+        help="Export a JSON document.",
+        description="Export the local state file as JSON.",
+        epilog="Example: staticclock export notes.json",
+    )
+    p_exp.add_argument("path", help="Destination JSON file.")
+    p_exp.add_argument("--json", action="store_true", dest="as_json", help="Print the export record as JSON.")
 
     return parser
+
+
+def _welcome(*, as_json: bool) -> int:
+    if as_json:
+        print(
+            json.dumps(
+                {
+                    "product": "staticclock",
+                    "version": __version__,
+                    "author": AUTHOR,
+                    "next": "staticclock ui",
+                },
+                indent=2,
+            )
+        )
+        return 0
+    print("StaticClock records actions in order. Each action locks forward as one click.")
+    print()
+    print("Open the timeline:")
+    print("  staticclock ui")
+    print()
+    print("Or record one action:")
+    print('  staticclock click --action "opened the ledger"')
+    print()
+    print("Check this install:")
+    print("  staticclock doctor")
+    print()
+    print("More commands: staticclock --help")
+    print(f"Author: {AUTHOR}")
+    return 0
 
 
 def _open_timeline(path: str | None) -> Timeline:
@@ -131,14 +336,25 @@ def _open_timeline(path: str | None) -> Timeline:
         return Timeline()
     pth = Path(path)
     if pth.exists() and pth.stat().st_size > 0:
-        return Timeline.load(pth)
+        return _load_existing(str(pth))
     return Timeline(path=pth)
 
 
-def _print_click(tick, *, as_json: bool) -> None:
+def _load_existing(path: str) -> Timeline:
+    pth = Path(path)
+    if not pth.is_file():
+        raise FileNotFoundError(path)
+    try:
+        return Timeline.load(pth)
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"{path} is not a StaticClock timeline") from exc
+
+
+def _print_click(tick, *, as_json: bool, lead: str) -> None:
     if as_json:
         print(json.dumps(tick.to_dict(), indent=2, ensure_ascii=False))
         return
+    print(lead)
     print(f"click: {tick.click}")
     print(f"second: {tick.second}")
     print(f"action: {tick.action}")
@@ -146,73 +362,144 @@ def _print_click(tick, *, as_json: bool) -> None:
     print(f"hash: {tick.hash}")
 
 
+def _click_error(exc: ValueError, command: str) -> int:
+    text = str(exc)
+    if "not a StaticClock timeline" in text:
+        return _fail(f"{text}. Try: staticclock doctor")
+    if "action is required" in text:
+        if command == "hook":
+            return _fail('The AZ-OS hook needs an action. Try: staticclock hook --action "invite accepted"')
+        if command == "genesis":
+            return _fail(
+                'Genesis needs an action. Try: staticclock genesis --timeline ticks.jsonl --action "first click"'
+            )
+        return _fail('Click needs an action. Try: staticclock click --action "opened the ledger"')
+    return _fail(f"{text}. Try: staticclock {command} --help")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
-    args = parser.parse_args(list(argv) if argv is not None else None)
+    try:
+        args = parser.parse_args(list(argv) if argv is not None else None)
+    except SystemExit as exc:
+        code = exc.code
+        if code is None:
+            return 0
+        return code if isinstance(code, int) else 2
+
+    if args.cmd is None:
+        return _welcome(as_json=bool(getattr(args, "as_json", False)))
 
     if args.cmd == "version":
-        print(f"staticclock {__version__}")
+        if getattr(args, "as_json", False):
+            print(json.dumps({"version": __version__, "author": AUTHOR}, indent=2))
+        else:
+            print(f"staticclock {__version__}")
         return 0
 
     if args.cmd == "anchors":
-        for name in TOP_30:
-            print(name)
+        names = list(TOP_30)
+        if getattr(args, "as_json", False):
+            print(json.dumps(names, indent=2, ensure_ascii=False))
+        else:
+            for name in names:
+                print(name)
         return 0
 
     if args.cmd == "click":
-        gear = _open_timeline(getattr(args, "timeline", None))
-        tick = gear.click(args.action, source=args.source)
-        _print_click(tick, as_json=args.as_json)
+        try:
+            gear = _open_timeline(getattr(args, "timeline", None))
+            tick = gear.click(args.action, source=args.source)
+        except ValueError as exc:
+            return _click_error(exc, "click")
+        _print_click(tick, as_json=args.as_json, lead="Recorded.")
         return 0
 
     if args.cmd == "hook":
-        gear = _open_timeline(getattr(args, "timeline", None))
-        hook = AzosHook(gear)
-        tick = hook.record(args.action, session=args.session, principle=args.principle)
-        _print_click(tick, as_json=args.as_json)
+        try:
+            gear = _open_timeline(getattr(args, "timeline", None))
+            hook = AzosHook(gear)
+            tick = hook.record(args.action, session=args.session, principle=args.principle)
+        except ValueError as exc:
+            return _click_error(exc, "hook")
+        _print_click(tick, as_json=args.as_json, lead="Recorded with the AZ-OS hook.")
         return 0
 
     if args.cmd == "genesis":
         try:
             gear = Timeline.genesis(args.timeline, action=args.action, source=args.source)
         except ValueError as exc:
-            print(str(exc), file=sys.stderr)
-            return 2
-        _print_click(gear[-1], as_json=args.as_json)
+            text = str(exc)
+            if "already exists" in text:
+                return _fail(
+                    f"{text}. Try: staticclock click --timeline {args.timeline} --action \"next\""
+                )
+            return _click_error(exc, "genesis")
+        _print_click(gear[-1], as_json=args.as_json, lead="Recorded the first click.")
         return 0
 
     if args.cmd == "timeline":
-        gear = _open_timeline(getattr(args, "timeline", None))
+        path = getattr(args, "timeline", None)
+        if path and not Path(path).exists():
+            return _fail(f'Could not find "{path}". Try: staticclock click --timeline {path} --action "opened the ledger"')
+        try:
+            gear = _open_timeline(path)
+        except ValueError as exc:
+            return _fail(f"{exc}. Try: staticclock timeline --help")
         rows = gear.to_list()
         if args.as_json:
             print(json.dumps({"clicks": rows, "length": len(rows)}, indent=2, ensure_ascii=False))
             return 0
         if not rows:
-            print("empty gear")
+            print("No actions yet.")
+            print('Try: staticclock click --action "opened the ledger"')
             return 0
         for row in rows:
             print(f"{row['click']:4}  {row['second']}  {row['source']:8}  {row['action']}")
         return 0
 
     if args.cmd == "verify":
-        gear = Timeline.load(args.timeline)
+        try:
+            gear = _load_existing(args.timeline)
+        except FileNotFoundError:
+            return _fail(
+                f'Could not find "{args.timeline}". Try: staticclock verify --timeline ticks.jsonl'
+            )
+        except ValueError as exc:
+            return _fail(f"{exc}. Try: staticclock verify --timeline ticks.jsonl")
         result = gear.verify()
         if args.as_json:
             print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
         else:
-            print("ok" if result.ok else "broken")
-            print(f"length: {result.length}")
+            print("Status: checks out" if result.ok else "Status: does not check out")
+            print(f"Actions: {result.length}")
             if result.last_hash:
-                print(f"last_hash: {result.last_hash}")
+                print(f"Last hash: {result.last_hash}")
             for err in result.errors:
                 print(err, file=sys.stderr)
+            if not result.ok:
+                print(
+                    'Next: recorded actions stay. Add a new one with staticclock click --action "note"',
+                    file=sys.stderr,
+                )
         return 0 if result.ok else 1
 
     if args.cmd == "timeslate":
-        gear = Timeline.load(args.timeline)
+        try:
+            gear = _load_existing(args.timeline)
+        except FileNotFoundError:
+            return _fail(
+                f'Could not find "{args.timeline}". Try: staticclock timeslate --timeline ticks.jsonl'
+            )
+        except ValueError as exc:
+            return _fail(f"{exc}. Try: staticclock timeslate --timeline ticks.jsonl")
         slate = gear.timeslate()
         if slate is None:
-            print("empty gear", file=sys.stderr)
+            print(
+                "No actions on this timeline yet. "
+                'Try: staticclock click --timeline ticks.jsonl --action "opened the ledger"',
+                file=sys.stderr,
+            )
             return 2
         if args.as_json:
             print(json.dumps(slate, indent=2, ensure_ascii=False))
@@ -235,12 +522,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.as_json:
             print(json.dumps(payload, indent=2, ensure_ascii=False))
         else:
+            print("Companion advisory")
             for key in OUTPUT_FIELDS:
                 print(f"{key}: {payload[key]}")
         return 0
 
     if args.cmd == "zones":
+        from staticclock.zones import list_timezones
+
         rows = list_timezones()
+        if getattr(args, "as_json", False):
+            print(json.dumps(rows, indent=2, ensure_ascii=False))
+            return 0
+        print("Local times")
         for row in rows:
             print(
                 f"{row['region']:16}  {row['iana']:36}  "
@@ -254,8 +548,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             serve(host=args.host, port=args.port)
         except ValueError as exc:
-            print(str(exc), file=sys.stderr)
-            return 2
+            return _fail(str(exc))
+        except OSError as exc:
+            return _fail(f"Could not open the timeline ({exc}). Try: staticclock ui --port 8766")
         return 0
 
     if args.cmd == "doctor":
@@ -266,19 +561,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.cmd == "import":
         from staticclock.jsonio import import_json
 
-        rec = import_json(args.path)
-        sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
+        try:
+            rec = import_json(args.path)
+        except FileNotFoundError:
+            return _fail(f'Could not find "{args.path}". Try: staticclock import notes.json')
+        except json.JSONDecodeError:
+            return _fail(f'"{args.path}" is not JSON. Try: staticclock import notes.json')
+        except ValueError as exc:
+            return _fail(f"{exc}. Try: staticclock import notes.json")
+        if args.as_json:
+            sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
+        else:
+            print(f"Imported {rec['imported']}")
+            print(f"Stored {rec['stored']}")
+            keys = ", ".join(rec.get("keys") or [])
+            print(f"Keys: {keys}" if keys else "Keys: (none)")
         return 0
 
     if args.cmd == "export":
         from staticclock.jsonio import export_json
 
-        rec = export_json(args.path)
-        sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
+        try:
+            rec = export_json(args.path)
+        except OSError as exc:
+            return _fail(f'Could not write "{args.path}" ({exc}). Try: staticclock export notes.json')
+        if args.as_json:
+            sys.stdout.write(json.dumps(rec, indent=2, ensure_ascii=False) + "\n")
+        else:
+            print(f"Exported {rec['exported']}")
+            print(f"Author: {rec['author']}")
         return 0
 
-    parser.error(f"unknown command {args.cmd}")
-    return 2
+    return _fail(f'Unknown command "{args.cmd}". Try: staticclock ui   or   staticclock --help')
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ python -m pip install -e .
 
 echo
 echo "Installed StaticClock."
-echo "Run:  staticclock ui"
-echo "Then open http://127.0.0.1:8765  (loopback only)"
+echo "Open the timeline:"
+echo "  staticclock ui"
+echo "Then open http://127.0.0.1:8765/"
 echo "Author: Aziel Eliab."

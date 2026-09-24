@@ -7,11 +7,13 @@ Self-contained CSS. No CDN. No rollback endpoint.
 
 from __future__ import annotations
 
+import errno
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from urllib.parse import urlparse
 
+from staticclock import __version__
 from staticclock.anchors import TOP_30
 from staticclock.azos import AzosHook
 from staticclock.engine import OUTPUT_FIELDS, StaticClock
@@ -64,7 +66,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         if path in {"/", "/index.html"}:
-            self._send(200, _web_bytes("index.html"), MIME[".html"])
+            if _wants_json(self.headers.get("Accept")):
+                self._json(200, _timeline_payload())
+                return
+            self._send(200, _index_html(), MIME[".html"])
             return
         if path == "/style.css":
             self._send(200, _web_bytes("style.css"), MIME[".css"])
@@ -79,15 +84,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, list_timezones())
             return
         if path == "/api/timeline":
-            self._json(
-                200,
-                {
-                    "clicks": _GEAR.to_list(),
-                    "length": len(_GEAR),
-                    "verify": _GEAR.verify().to_dict(),
-                    "timeslate": _GEAR.timeslate(),
-                },
-            )
+            self._json(200, _timeline_payload())
             return
         if path == "/api/timeslate":
             slate = _GEAR.timeslate()
@@ -178,16 +175,69 @@ def _web_bytes(name: str) -> bytes:
     return (WEB / name).read_bytes()
 
 
+def _index_html() -> bytes:
+    raw = _web_bytes("index.html").decode("utf-8")
+    return raw.replace("__VERSION__", __version__).encode("utf-8")
+
+
+def _timeline_payload() -> dict:
+    return {
+        "clicks": _GEAR.to_list(),
+        "length": len(_GEAR),
+        "verify": _GEAR.verify().to_dict(),
+        "timeslate": _GEAR.timeslate(),
+    }
+
+
+def _media_q(accept: str, media: str) -> float:
+    for part in accept.split(","):
+        bits = [bit.strip() for bit in part.split(";") if bit.strip()]
+        if not bits or bits[0].lower() != media:
+            continue
+        quality = 1.0
+        for bit in bits[1:]:
+            if bit.lower().startswith("q="):
+                try:
+                    quality = float(bit.split("=", 1)[1])
+                except ValueError:
+                    quality = 0.0
+        return quality
+    return -1.0
+
+
+def _wants_json(accept: str | None) -> bool:
+    """JSON only when the client asks for it ahead of HTML."""
+    header = accept or ""
+    json_q = _media_q(header, "application/json")
+    if json_q < 0:
+        return False
+    html_q = _media_q(header, "text/html")
+    return json_q > html_q
+
+
+def _open_url(host: str, port: int) -> str:
+    if ":" in host:
+        return f"http://[{host}]:{port}/"
+    return f"http://{host}:{port}/"
+
+
 def make_server(host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
     if host not in LOOPBACK:
-        raise ValueError("StaticClock UI binds loopback only (127.0.0.1)")
-    return ThreadingHTTPServer((host, port), Handler)
+        raise ValueError("StaticClock UI binds loopback only (127.0.0.1). Try: staticclock ui")
+    try:
+        return ThreadingHTTPServer((host, port), Handler)
+    except OSError as exc:
+        if exc.errno == errno.EADDRINUSE:
+            raise ValueError(
+                f"Port {port} is already in use. Try: staticclock ui --port {port + 1}"
+            ) from exc
+        raise
 
 
 def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     httpd = make_server(host, port)
     bound_host, bound_port = httpd.server_address[:2]
-    print(f"StaticClock UI http://{bound_host}:{bound_port} (loopback only; gear clicks forward)")
+    print(f"Open {_open_url(str(bound_host), int(bound_port))}", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
