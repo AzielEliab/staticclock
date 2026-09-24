@@ -469,3 +469,17 @@
   setInterval(refreshMesh, 30000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshMesh(); });
 })();
+
+(function () {
+  var el = document.getElementById("os-line");
+  if (!el) return;
+  var ua = navigator.userAgent || "";
+  var platform = navigator.platform || "";
+  var name = "this computer";
+  if (/Android/i.test(ua)) name = "Android";
+  else if (/iPhone|iPad|iPod/i.test(ua)) name = "iPhone or iPad";
+  else if (/Mac/i.test(platform) || /Macintosh/i.test(ua)) name = "macOS";
+  else if (/Win/i.test(platform) || /Windows/i.test(ua)) name = "Windows";
+  else if (/Linux/i.test(platform) || /Linux/i.test(ua)) name = "Linux";
+  el.textContent = "This browser is " + name + ". One Python package for macOS, Linux, and Windows. Phone app sources stay in the repository.";
+})();

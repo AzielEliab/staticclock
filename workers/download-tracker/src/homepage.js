@@ -95,55 +95,74 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
 <link rel="stylesheet" href="/product.css">
 </head>
 <body>
-  <header class="top">
-    <div class="brandrow">
-      <img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async">
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="wrap">
+  <main id="main">
+  <header class="hero">
+    <div class="hero-grid">
       <div>
-        <p class="stamp">Aziel Eliab</p>
-        <p class="tag">v0.2.0 · hosted workspace · AZ-OS hook · Apache-2.0</p>
+        <div class="brandrow">
+          <img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async">
+          <p class="stamp">Aziel Eliab</p>
+          <p class="health" id="health-pill" aria-live="polite">checking API…</p>
+        </div>
+        <h1>StaticClock</h1>
+        <p class="motto">Every action is a gear click. Time only locks forward.</p>
+        <p class="lede">v0.2.0 hosted workspace by Aziel Eliab. Click the gear on this page, or install the package on this computer. Apache-2.0.</p>
+        <div class="hero-actions">
+          <a id="download" class="btn primary dl" href="/download?asset=${assetName}" aria-describedby="os-line download-note">Download</a>
+          <button type="button" class="btn install" id="install-btn">One-click install</button>
+        </div>
+        <p class="os" id="os-line">One Python package for macOS, Linux, and Windows. Phone app sources stay in the repository.</p>
+        <p class="asset-note" id="download-note"><code>${assetName}</code> · counted on this Worker for every branch and fork</p>
+        <pre id="install-cmd">curl -fsSL ${HOST}/install.sh | bash</pre>
+        <p class="kid">Then run <code>staticclock ui</code> and open http://127.0.0.1:8765 on this computer. Click the gear.</p>
       </div>
-      <p class="health" id="health-pill" aria-live="polite">checking API…</p>
+      <figure class="markplate">
+        <div class="stage-top">
+          <img src="/sigil.png" width="28" height="28" alt="" decoding="async">
+          <span>On this page</span>
+        </div>
+        <ol>
+          <li><b>1</b><span>Type an action and click the gear.</span></li>
+          <li><b>2</b><span>The chain stays in this browser.</span></li>
+          <li><b>3</b><span>Verify checks the hashes. Export saves JSON.</span></li>
+        </ol>
+        <figcaption>Hosted preview. After Download, <code>staticclock ui</code> listens on 127.0.0.1:8765.</figcaption>
+      </figure>
     </div>
-    <h1>StaticClock</h1>
-    <p class="byline">Aziel Eliab only</p>
-    <p class="motto">Every action is a gear click. Time only locks forward.</p>
+    <nav class="toc" aria-label="Product">
+      <a href="#workspace">Workspace</a>
+      <a href="#features">Features</a>
+      <a href="#meshStrip">Live Nodes</a>
+      <a href="#install">Downloads</a>
+      <a href="#cite">Cite</a>
+      <a href="${GITHUB_REPO}">GitHub</a>
+    </nav>
   </header>
 
   <p class="banner" role="note">THIS IS: an action-based immutable timeline — every action is a gear click or second that locks forward. AZ-OS hook records; it does not exec. Companion advisory names five fields for a last-known geo. THIS IS NOT: a rollback clock, a remote shell, a scheduler, or ChronoLock. Related: ChronoLock (advisory window). Distinct from TemporalLock (observation receipts). Hosted <code>/v1</code> is stateless and does not store a chain. Author Aziel Eliab only.</p>
 
-  <div id="meshStrip" aria-label="Suite Live Nodes">
-    <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
-    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
-    <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
-    <div>No Node Gate · No public qnsd proxy · QNS-CD-1.0 cite · No auto-heal · Plain category (not Lock) · Aziel Eliab only</div>
-    <div>
-      <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
-      <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
-      <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
-      <button id="meshJoin" type="button" title="Join as staticclock. Refused while mesh is OFF. No auto-join.">Join</button>
-      <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
-    </div>
-    <p id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 cross-map · not AnonBroadcast · not AZMail ring · not a Node Gate · no public qnsd proxy · Plain (not Lock)</p>
-  </div>
-
-  <section class="card install" id="install">
-    <div class="nums">
-      <p class="count">${v}<span>Views</span></p>
-      <p class="count">${n}<span>Downloads</span></p>
-    </div>
-    <p class="kid"><strong>Counted download.</strong> Download saves the gzip (the Downloads number goes up). One-click install copies a Terminal command. After it finishes, type <code>staticclock ui</code>.</p>
-    <div class="btns">
-      <a class="btn primary dl" href="/download?asset=${assetName}">Download</a>
-      <button type="button" class="btn install" id="install-btn">One-click install</button>
-    </div>
-    <pre id="install-cmd">curl -fsSL ${HOST}/install.sh | bash</pre>
-    <p class="kid">Then run: <code>staticclock ui</code> and open http://127.0.0.1:8765 (this computer only). Click the gear. Optional AZ-OS hook.</p>
-    <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${assetName} — ${n} counted.</p>
-    <p class="iso">Isolated counter: Worker <code>staticclock-download-tracker</code>, project <code>staticclock</code>, KV <code>STATICCLOCK_DOWNLOADS</code>. Not mixed with any other product. <code>/v1</code> does not increment downloads or views.</p>
-    <p class="meta">GitHub: stars ${escapeHtml(gh.stars || 0)} · forks ${escapeHtml(gh.forks || 0)} · watchers ${escapeHtml(gh.watchers || 0)} · release assets ${escapeHtml(gh.release_download_count || 0)}</p>
-    <p class="meta"><a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_REPO}/releases/latest">releases</a> · <a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/mesh">/v1/mesh</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${CATALOG}">Catalog</a></p>
-    <h2>Per repo / branch / fork</h2>
-    <ul class="breakdown">${rows}</ul>
+  <section class="block" id="features">
+    <h2>What you can do</h2>
+    <ul class="features">
+      <li>
+        <h3>Gear click</h3>
+        <p>One action locks one UTC second forward. A later click may name an earlier hash. The old click stays.</p>
+      </li>
+      <li>
+        <h3>AZ-OS hook</h3>
+        <p>Records a principle-bound action into the timeline. It does not run the action and it does not open a shell.</p>
+      </li>
+      <li>
+        <h3>Companion advisory</h3>
+        <p>Names a last-known geo, a local time, a date, a language, and a dialect.</p>
+      </li>
+      <li>
+        <h3>Timeslate</h3>
+        <p>Each click has a cross-hash you can hand to TemporalLock. StaticClock does not store TemporalLock receipts.</p>
+      </li>
+    </ul>
   </section>
 
   <section class="card workspace" id="workspace">
@@ -227,17 +246,45 @@ export function renderHomepage({ views, downloads, breakdown, github, asset }) {
     </section>
   </section>
 
+  <div id="meshStrip" aria-label="Suite Live Nodes">
+    <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
+    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
+    <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
+    <div>No Node Gate · No public qnsd proxy · QNS-CD-1.0 cite · No auto-heal · Plain category (not Lock) · Aziel Eliab only</div>
+    <div class="mesh-actions">
+      <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
+      <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
+      <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
+      <button id="meshJoin" type="button" title="Join as staticclock. Refused while mesh is OFF. No auto-join.">Join</button>
+      <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
+    </div>
+    <p id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 cross-map · not AnonBroadcast · not AZMail ring · not a Node Gate · no public qnsd proxy · Plain (not Lock)</p>
+  </div>
+
+  <section class="card install" id="install">
+    <h2>Counted downloads</h2>
+    <p class="quiet-counts"><span><b>${v}</b> views</span><span><b>${n}</b> downloads</span></p>
+    <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${assetName} — ${n} counted.</p>
+    <p class="iso">Isolated counter: Worker <code>staticclock-download-tracker</code>, project <code>staticclock</code>, KV <code>STATICCLOCK_DOWNLOADS</code>. Not mixed with any other product. <code>/v1</code> does not increment downloads or views.</p>
+    <p class="meta">GitHub: stars ${escapeHtml(gh.stars || 0)} · forks ${escapeHtml(gh.forks || 0)} · watchers ${escapeHtml(gh.watchers || 0)} · release assets ${escapeHtml(gh.release_download_count || 0)}</p>
+    <h3>Per repo / branch / fork</h3>
+    <ul class="breakdown">${rows}</ul>
+  </section>
+
   <section class="cite" id="cite">
     <h2>How to cite</h2>
     <p>Aziel Eliab. StaticClock. ${GITHUB_REPO}. ${HOST}.</p>
     <p>Apache-2.0. No DOI on this record. Do not invent a Zenodo identifier.</p>
     <p><a href="${CATALOG}">Catalog</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${HOST}/download">Download</a> · <a href="${HOST}/cite.json">cite.json</a></p>
   </section>
+  </main>
 
   <footer>
-    <p><strong>Every action is a gear click. Time only locks forward.</strong></p>
+    <p>Every action is a gear click. Time only locks forward.</p>
     <p>Apache-2.0 · Aziel Eliab only · 2026 · Forks welcome and always allowed.</p>
+    <p><a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_REPO}/releases/latest">Releases</a> · <a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/mesh">/v1/mesh</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${CATALOG}">Catalog</a></p>
   </footer>
+  </div>
   <script src="/product.js"></script>
 </body>
 </html>`;
