@@ -1,16 +1,10 @@
-# StaticClock — iPhone & Android
+# StaticClock on iPhone and Android
 
-Action-based immutable timeline. Every action is a gear click. No rollbacks.
-AZ-OS hook records on device. Companion advisory still available.
+Record an action on this phone. The list grows while the app is open.
 
-Offline. No analytics. Dark matte / gold.
+**Author:** Aziel Eliab
 
-Application id: `com.azieeliab.staticclock`
-
-## Open in Android Studio / Xcode
-
-The `android/` and `ios/` folders here are skeleton READMEs because
-this tree was written without the Flutter SDK on PATH.
+## Start
 
 ```bash
 cd mobile
@@ -19,20 +13,23 @@ flutter pub get
 flutter run
 ```
 
-Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in
-Xcode.
+Press **Record action**. AZ-OS and the companion advisory are under **Advanced**. The theme follows the system light and dark setting. Gold marks the focused control.
 
-## Honest scope
+Application id: `com.azieeliab.staticclock`. Offline.
 
-Action-based immutable timeline. The gear does not rewind. AZ-OS hook
-does not exec. Author Aziel Eliab.
+The `android/` and `ios/` folders are skeleton READMEs until `flutter create .` runs. Then open `android/` in Android Studio or `ios/Runner.xcworkspace` in Xcode.
 
-## Desktop package (counted download)
+## Desktop timeline
 
-This phone app does not replace the desktop package.
+The phone list does not replace the desktop package. On a computer:
 
-# → https://staticclock-download-tracker.vibelock.workers.dev/ ←
+```bash
+staticclock ui
+```
 
+Open http://127.0.0.1:8765/
+
+Counted archive: https://staticclock-download-tracker.vibelock.workers.dev/  
 GitHub: https://github.com/AzielEliab/staticclock
 
-**Forks are welcome and always allowed.**
+Forks are welcome and always allowed.

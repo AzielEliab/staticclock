@@ -3,128 +3,114 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StaticClock — immutable timeline</title>
+  <title>StaticClock</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header>
-    <div class="tag">StaticClock · v0.2.0 · loopback · AZ-OS hook</div>
-    <h1>Every action is a gear click. Time only locks forward.</h1>
-    <p class="lede">
-      Action-based immutable timeline. No rollbacks. Each action is a
-      click — a second that stays. AZ-OS records principle-bound
-      actions into this gear. Author Aziel Eliab.
-    </p>
+  <header class="top">
+    <p class="brand">StaticClock</p>
+    <p class="status" id="verify-note">No actions yet</p>
   </header>
-  <hr class="rule">
 
-  <section class="gear-head">
-    <p class="count" id="click-count">0<span>clicks</span></p>
-    <p class="note" id="verify-note">empty gear</p>
-    <p class="note" id="timeslate-note">timeslate: —</p>
-  </section>
+  <main>
+    <h1>Record what happened, in order.</h1>
+    <p class="lede" id="welcome">Each action is a gear click that locks forward.</p>
 
-  <form id="click-form" autocomplete="off">
-    <div class="row">
-      <label for="action">
-        <span class="kicker">Action</span>
-        One click. One second. It will not rewind.
-      </label>
-      <input id="action" name="action" type="text" placeholder="opened the ledger" spellcheck="false">
-    </div>
-    <button class="advise" type="submit" id="go-click">Click the gear</button>
-  </form>
+    <form id="click-form" autocomplete="off">
+      <label for="action">Action</label>
+      <input id="action" name="action" type="text" placeholder="opened the ledger" spellcheck="false" autocomplete="off">
+      <div class="actions">
+        <button class="primary" type="submit" id="go-click">Record action</button>
+        <button class="ghost" type="button" id="help-btn">Help</button>
+      </div>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+    </form>
 
-  <form id="hook-form" autocomplete="off">
-    <div class="row">
-      <label for="hook-action">
-        <span class="kicker">AZ-OS hook</span>
-        Records into the timeline. Does not exec. Does not open a shell.
-      </label>
-      <input id="hook-action" name="hook-action" type="text" placeholder="invite accepted" spellcheck="false">
-    </div>
-    <div class="row">
-      <label for="hook-session">
-        <span class="kicker">Session label</span>
-        Optional. Bound to AZ-OS principles.
-      </label>
-      <input id="hook-session" name="hook-session" type="text" placeholder="azos-1" spellcheck="false">
-    </div>
-    <button class="advise" type="submit" id="go-hook">Record via AZ-OS</button>
-  </form>
+    <section class="timeline" aria-labelledby="timeline-title">
+      <h2 id="timeline-title">Timeline</h2>
+      <p class="count" id="click-count">0 actions</p>
+      <p class="empty" id="empty-note">No actions yet. Type one above and record it.</p>
+      <ol class="ticks" id="ticks"></ol>
+    </section>
 
-  <div class="row io">
-    <button type="button" id="verify-btn">Verify</button>
-    <label>Import JSON <input type="file" id="import-json" accept="application/json,.json"></label>
-    <button type="button" id="export-json">Export JSON</button>
-  </div>
+    <details class="panel" id="advanced">
+      <summary>Advanced</summary>
+      <div class="panel-body">
+        <section>
+          <h3>AZ-OS hook</h3>
+          <p class="hint">Records this action into the timeline.</p>
+          <form id="hook-form" autocomplete="off">
+            <label for="hook-action">Action</label>
+            <input id="hook-action" name="hook-action" type="text" placeholder="invite accepted" spellcheck="false">
+            <label for="hook-session">Session label <span class="optional">optional</span></label>
+            <input id="hook-session" name="hook-session" type="text" placeholder="azos-1" spellcheck="false">
+            <button class="secondary" type="submit" id="go-hook">Record with AZ-OS</button>
+            <p class="form-error" id="hook-error" role="alert" hidden></p>
+          </form>
+        </section>
 
-  <section class="output" aria-live="polite">
-    <h2>Timeline</h2>
-    <ol class="ticks" id="ticks"></ol>
-    <p class="note">Append-only. A later click may mention an earlier hash. The old click stays.</p>
-  </section>
+        <section class="tool-row">
+          <h3>Check and files</h3>
+          <div class="actions">
+            <button type="button" class="secondary" id="verify-btn">Check chain</button>
+            <button type="button" class="ghost" id="export-json">Export JSON</button>
+          </div>
+          <label class="file" for="import-json">Import JSON
+            <input type="file" id="import-json" accept="application/json,.json">
+          </label>
+          <p class="hint" id="file-note">Import fills this page. Record action still writes the timeline.</p>
+          <p class="hint" id="timeslate-note">Timeslate appears after the first action.</p>
+        </section>
 
-  <hr class="rule">
+        <section>
+          <h3>Companion advisory</h3>
+          <p class="hint">Names a place, time, date, language, and dialect. This also records a click.</p>
+          <form id="advise-form" autocomplete="off">
+            <label for="geo">Last-known geo</label>
+            <input id="geo" name="geo" type="text" placeholder="Indiana" spellcheck="false">
+            <p class="or">or</p>
+            <label for="anchor">Top-30 country</label>
+            <select id="anchor" name="anchor">
+              <option value="">Choose a country</option>
+            </select>
+            <button class="secondary" type="submit" id="go">Advise</button>
+            <p class="form-error" id="advise-error" role="alert" hidden></p>
+          </form>
+          <dl class="fields">
+            <dt>Place</dt>
+            <dd id="out-geo" class="empty">—</dd>
+            <dt>Time</dt>
+            <dd id="out-time" class="empty">—</dd>
+            <dt>Date</dt>
+            <dd id="out-date" class="empty">—</dd>
+            <dt>Language</dt>
+            <dd id="out-lang" class="empty">—</dd>
+            <dt>Dialect</dt>
+            <dd id="out-dialect" class="empty">—</dd>
+          </dl>
+        </section>
 
-  <form id="advise-form" autocomplete="off">
-    <p class="lede">Companion advisory (also clicks the gear). ChronoLock is the related window product.</p>
-    <div class="row">
-      <label for="geo">
-        <span class="kicker">Last-known geo</span>
-        Free text (city, region, country). Not an identity.
-      </label>
-      <input id="geo" name="geo" type="text" placeholder="Indiana" spellcheck="false">
-    </div>
-    <div class="or">or</div>
-    <div class="row">
-      <label for="anchor">
-        <span class="kicker">Top-30 country</span>
-        Anchor dropdown. Polarize a five-region basket from this.
-      </label>
-      <select id="anchor" name="anchor">
-        <option value="">— choose an anchor —</option>
-      </select>
-    </div>
-    <button class="advise" type="submit" id="go">Advise</button>
-  </form>
+        <section class="zones">
+          <h3>Local times</h3>
+          <p class="hint">Read-only. Computed on this computer.</p>
+          <ul id="zones-list" class="zone-list"></ul>
+        </section>
+      </div>
+    </details>
 
-  <section class="output" aria-live="polite">
-    <h2>Companion advisory</h2>
-    <dl class="fields">
-      <dt>geo location chosen</dt>
-      <dd id="out-geo" class="empty">—</dd>
-      <dt>optimal time</dt>
-      <dd id="out-time" class="empty">—</dd>
-      <dt>optimal date</dt>
-      <dd id="out-date" class="empty">—</dd>
-      <dt>primary language</dt>
-      <dd id="out-lang" class="empty">—</dd>
-      <dt>dialect section</dt>
-      <dd id="out-dialect" class="empty">—</dd>
-    </dl>
-  </section>
-
-  <section class="zones">
-    <h2>Timezone reference</h2>
-    <p>Read-only. Computed locally with IANA zoneinfo.</p>
-    <table>
-      <thead>
-        <tr>
-          <th>Region</th>
-          <th>IANA</th>
-          <th>Local date</th>
-          <th>Local time</th>
-          <th>UTC</th>
-        </tr>
-      </thead>
-      <tbody id="zones-body"></tbody>
-    </table>
-  </section>
+    <details class="panel" id="about">
+      <summary>About</summary>
+      <div class="panel-body">
+        <p>StaticClock __VERSION__ keeps an ordered timeline on this computer. Author Aziel Eliab.</p>
+        <p>Open it with <code>staticclock ui</code>. Check the install with <code>staticclock doctor</code>.</p>
+        <p>The AZ-OS hook records an action here. It does not run a command. The earlier clicks stay when a later action mentions an earlier hash.</p>
+        <p>Bound to 127.0.0.1. Apache-2.0. Forks are welcome.</p>
+      </div>
+    </details>
+  </main>
 
   <footer>
-    <p><strong>Every action is a gear click. Time only locks forward.</strong></p>
-    <p>Apache-2.0 · Aziel Eliab · 2026 · Bound to 127.0.0.1 · Forks welcome and always allowed.</p>
+    <p>Aziel Eliab</p>
   </footer>
   <script src="/app.js"></script>
 </body>
